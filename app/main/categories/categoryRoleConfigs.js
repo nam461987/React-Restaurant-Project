@@ -114,6 +114,19 @@ export const categoryRoleConfigs = {
             component: FuseLoadable({
                 loader: () => import('./menu/Price')
             })
+        },
+        {
+            path     : '/categories/tables/:id/:handle?',
+            component: FuseLoadable({
+                loader: () => import('./table/SeatTable')
+            })
+        },
+        {
+            path     : '/categories/tables',
+            authByStr: "category_restaurant_table_list",
+            component: FuseLoadable({
+                loader: () => import('./table/SeatTables')
+            })
         }
     ]
 };

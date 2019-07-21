@@ -6,6 +6,7 @@ import {errorRoleConfigs} from 'app/main/errors/errorRoleConfigs';
 import {appRoleConfigs} from 'app/main/apps/appRoleConfigs';
 import {adminRoleConfigs} from 'app/main/admin/adminRoleConfigs';
 import {categoryRoleConfigs} from 'app/main/categories/categoryRoleConfigs';
+import {orderRoleConfigs} from 'app/main/order/orderRoleConfigs';
 import {ExampleConfig} from 'app/main/example/ExampleConfig';
 import {LoginConfig} from 'app/main/login/LoginConfig';
 
@@ -15,6 +16,7 @@ const routeConfigs = [
     ...appRoleConfigs,
     adminRoleConfigs,
     categoryRoleConfigs,
+    orderRoleConfigs,
     ExampleConfig,
     LoginConfig
 ];

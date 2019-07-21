@@ -25,6 +25,7 @@ const navigationConfig = [
                 'id'   : 'categories-component',
                 'title': 'Categories',
                 'type' : 'collapse',
+                'authByStr' : 'category_see',
                 'icon' : 'whatshot',
                 'children': [
                     {
@@ -82,8 +83,30 @@ const navigationConfig = [
                         'type' : 'item',
                         'authByStr' : 'category_menu_list',
                         'url'  : '/categories/menus'
+                    },
+                    {
+                        'id'   : 'table-component',
+                        'title': 'Table',
+                        'type' : 'item',
+                        'authByStr' : 'category_restaurant_table_list',
+                        'url'  : '/categories/tables'
                     }
                 ]
+            }
+        ]
+    },
+    {
+        'id'      : 'orders',
+        'title'   : 'Orders',
+        'type'    : 'group',
+        'icon'    : 'apps',
+        'children': [
+            {
+                'id'   : 'order-component',
+                'title': 'Order',
+                'type' : 'item',
+                'icon' : 'home',
+                'url'  : '/orders'
             }
         ]
     },

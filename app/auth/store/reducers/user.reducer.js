@@ -3,9 +3,9 @@ import * as Actions from '../actions';
 const initialState = {
     permissions: [],
     data: {
-        'displayName': 'Nam To',
-        'photoURL': 'assets/images/avatars/Velazquez.jpg',
-        'email': 'namhdto@gmail.com'
+        'displayName': 'Anonymous',
+        'photoURL': '',
+        'email': ''
     }
 };
 

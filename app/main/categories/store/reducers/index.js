@@ -17,6 +17,8 @@ import menus from './menus.reducer';
 import menu from './menu.reducer';
 import prices from './prices.reducer';
 import price from './price.reducer';
+import tables from './tables.reducer';
+import table from './table.reducer';
 
 const reducer = combineReducers({
     restaurants,
@@ -36,7 +38,9 @@ const reducer = combineReducers({
     menus,
     menu,
     prices,
-    price
+    price,
+    tables,
+    table
 });
 
 export default reducer;

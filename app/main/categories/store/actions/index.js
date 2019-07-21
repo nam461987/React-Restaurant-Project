@@ -16,3 +16,5 @@ export * from './menus.actions';
 export * from './menu.actions';
 export * from './prices.actions';
 export * from './price.actions';
+export * from './tables.actions';
+export * from './table.actions';

@@ -80,8 +80,13 @@ export function checkEmail(data) {
 export function newRestaurant() {
     const data = {
         Id: 0,
+        TypeId: '',
         Name: '',
+        Email: '',
         Phone: '',
+        StateId: '',
+        CityId: '',
+        Zip: '',
         Address: '',
         Description: ''
     };

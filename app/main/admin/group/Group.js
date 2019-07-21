@@ -359,11 +359,6 @@ class Group extends Component {
                                         case "select":
                                         case "select2":
                                             {
-                                                //check if admin right or restaurant owner. Don't need to pick Type and Branch
-                                                if (form.TypeId && (form.TypeId == 1 || form.TypeId == 2 || form.TypeId == 3) &&
-                                                    (f.field == 'BranchId' || f.field == 'TypeId' || f.field == 'RestaurantId')) {
-                                                    return;
-                                                }
                                                 const options = typeof f.option == "object" ?
                                                     this.props.options.options['options_' + f.field + '_array'] ? this.props.options.options['options_' + f.field + '_array'].map(o => ({ value: o.Value, label: o.DisplayText })) : []
                                                     : this.props.options.options['options_' + f.field + '_' + f.option] ? this.props.options.options['options_' + f.field + '_' + f.option].map(o => ({ value: o.Value, label: o.DisplayText })) : []

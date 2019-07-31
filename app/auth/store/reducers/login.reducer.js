@@ -25,6 +25,12 @@ const login = function (state = initialState, action) {
                 error  : action.payload
             };
         }
+        case Actions.LOGOUT:
+        {
+            return {
+                success: false
+            };
+        }
         default:
         {
             return state

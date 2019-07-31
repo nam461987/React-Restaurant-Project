@@ -7,6 +7,7 @@ import firebase from 'firebase/app';
 import firebaseService from 'app/services/firebaseService';
 import auth0Service from 'app/services/auth0Service';
 import jwtService from 'app/services/jwtService';
+import {logout} from './login.actions';
 
 export const SET_USER_DATA = '[USER] SET DATA';
 export const REMOVE_USER_DATA = '[USER] REMOVE DATA';
@@ -186,6 +187,8 @@ export function logoutUser()
         }
 
         dispatch(setInitialSettings());
+
+        dispatch(logout());
 
         dispatch({
             type: USER_LOGGED_OUT

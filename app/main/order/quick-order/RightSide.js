@@ -18,7 +18,7 @@ import {
 } from '@material-ui/core';
 import { showMessage } from 'app/store/actions/fuse';
 import Filter from 'app/main/shared/functions/filters';
-import * as Actions from './store/actions';
+import * as Actions from '../store/actions';
 
 const TAX_RATE = 0.07;
 
@@ -44,7 +44,6 @@ function createRow(desc, qty, unit) {
 }
 
 function subtotal(items) {
-    console.log(items);
     return items.map(({ Price }) => Price).reduce((sum, i) => sum + i, 0);
 }
 
@@ -60,9 +59,6 @@ class RightSide extends Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        console.log(prevProps);
-        console.log(prevState);
-        console.log(this.props.orders);
         const oldValue = cloneDeep(this.props.orders);
         if (!_.isEqual(this.props.orders, this.state.orders)) {
             this.setState({ orders: oldValue })
@@ -78,6 +74,10 @@ class RightSide extends Component {
                 this.props.refresh();
             }
         }
+    }
+
+    handleRowClick = (index,obj) => {
+        this.props.setEditOrder(index,obj);
     }
 
     sumFunction = () => {
@@ -110,8 +110,9 @@ class RightSide extends Component {
                     <TableBody>
                         {this.props.orders.length > 0 ? this.props.orders.map((item, index) =>
                             (
-                                <TableRow key={index}>
-                                    <TableCell align="left" style={{ width: '10%' }}>
+                                <TableRow hover key={index} onClick={event => this.handleRowClick(index,item)}>
+                                    <TableCell align="left" style={{ width: '10%' }}
+                                        onClick={event => event.stopPropagation()}>
                                         <IconButton onClick={event => this.handleDeleteOrder(index)} color="secondary" aria-label="delete this order">
                                             <Icon fontSize="small" className="text-red">clear</Icon>
                                         </IconButton>
@@ -160,7 +161,8 @@ class RightSide extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         showMessage: showMessage,
-        deleteOrder: Actions.deleteOrder
+        deleteOrder: Actions.deleteOrder,
+        setEditOrder: Actions.setEditOrder
     }, dispatch);
 }
 

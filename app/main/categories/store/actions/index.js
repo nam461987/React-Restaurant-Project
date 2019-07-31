@@ -18,3 +18,5 @@ export * from './prices.actions';
 export * from './price.actions';
 export * from './tables.actions';
 export * from './table.actions';
+export * from './processes.actions';
+export * from './process.actions';

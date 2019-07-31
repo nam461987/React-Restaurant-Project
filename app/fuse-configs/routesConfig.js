@@ -7,6 +7,7 @@ import {appRoleConfigs} from 'app/main/apps/appRoleConfigs';
 import {adminRoleConfigs} from 'app/main/admin/adminRoleConfigs';
 import {categoryRoleConfigs} from 'app/main/categories/categoryRoleConfigs';
 import {orderRoleConfigs} from 'app/main/order/orderRoleConfigs';
+import {placedOrderRoleConfigs} from 'app/main/order/placedOrderRoleConfigs';
 import {ExampleConfig} from 'app/main/example/ExampleConfig';
 import {LoginConfig} from 'app/main/login/LoginConfig';
 
@@ -17,6 +18,7 @@ const routeConfigs = [
     adminRoleConfigs,
     categoryRoleConfigs,
     orderRoleConfigs,
+    placedOrderRoleConfigs,
     ExampleConfig,
     LoginConfig
 ];

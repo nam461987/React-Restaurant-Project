@@ -1,11 +1,14 @@
 import * as Actions from '../actions';
-import { stat } from 'fs';
 
 const initialState = {
     categories: [],
     menus: [],
     prices: [],
-    orders: []
+    orders: [],
+    customers: [],
+    tables: [],
+    orderChannels: [],
+    editOrder: null
 };
 
 const ordersReducer = function (state = initialState, action) {
@@ -56,14 +59,57 @@ const ordersReducer = function (state = initialState, action) {
                     ...state.orders.push(action.payload)
                 };
             }
+        case Actions.SET_EDIT_ORDER:
+            {
+                if (action.index > -1) {
+                    state.orders.splice(action.index, 1);
+                    return {
+                        ...state,
+                        editOrder: action.payload
+                    };
+                }
+            }
         case Actions.DELETE_ORDER:
             {
                 if (action.payload > -1) {
                     state.orders.splice(action.payload, 1);
                 }
-                console.log(state.orders);
                 return {
                     ...state
+                };
+            }
+        case Actions.ADD_PLACED_ORDER_DETAIL:
+            {
+                return {
+                    ...state
+                };
+            }
+        case Actions.GET_ALL_CUSTOMERS:
+            {
+                return {
+                    ...state,
+                    customers: action.payload
+                };
+            }
+        case Actions.GET_ALL_TABLES:
+            {
+                return {
+                    ...state,
+                    tables: action.payload
+                };
+            }
+        case Actions.GET_ALL_ORDER_CHANNELS:
+            {
+                return {
+                    ...state,
+                    orderChannels: action.payload
+                };
+            }
+        case Actions.SET_DEFAULT_ORDERS_VALUE:
+            {
+                return {
+                    ...state,
+                    orders: []
                 };
             }
         default:

@@ -127,13 +127,13 @@ class BaseLoginTab extends Component {
                         <tbody>
                             <tr>
                                 <td><Typography>Admin</Typography></td>
-                                <td><Typography>admin</Typography></td>
-                                <td><Typography>admin</Typography></td>
+                                <td><Typography>mua-rung</Typography></td>
+                                <td><Typography>mua-rung123</Typography></td>
                             </tr>
                             <tr>
                                 <td><Typography>Staff</Typography></td>
-                                <td><Typography>staff</Typography></td>
-                                <td><Typography>staff</Typography></td>
+                                <td><Typography>muarungstaff1</Typography></td>
+                                <td><Typography>111111</Typography></td>
                             </tr>
                         </tbody>
                     </table>

@@ -17,7 +17,8 @@ obj.defaultConfig = {
 
 obj.fields = [
     { field: "Id", label: "#", create: false, edit: true, list: false, type: "hidden", align: 'left', disablePadding: true, sort: false, required: true },
-    { field: "RestaurantId", label: "Restaurant", view: 'Name', create: true, edit: true, list: true, type: 'select', option: '/option/getrestaurant', align: 'left', disablePadding: false, sort: true, required: true },
+    { field: "RestaurantId", label: "Restaurant", view: 'Name', create: true, edit: false, list: true, type: 'select', option: '/option/getrestaurant', align: 'left', disablePadding: false, sort: true, required: true },
+    { field: "BranchId", label: "Branch", view: 'Name', depend: 'RestaurantId', create: true, edit: false, list: true, type: 'select', option: '/option/getbranch', align: 'left', disablePadding: false, sort: true, required: true },
     { field: "Name", label: "Name", create: true, edit: true, list: true, align: 'left', disablePadding: false, sort: true, required: true, autoFocus: true },
     { field: "Capacity", label: "Capacity", create: true, edit: true, list: true, type: 'number', align: 'left', disablePadding: false, sort: true },
     { field: "Description", label: "Description", create: true, edit: true, list: true, type: "textarea", align: 'right', disablePadding: false, sort: true },

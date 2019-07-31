@@ -108,9 +108,9 @@ class Category extends Component {
         for (var i = 0; i < obj.fields.length; i++) {
             if (obj.fields[i].depend) {
                 if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
-                    && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]){
-                        this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, category.data[obj.fields[i].depend] );
-                    }
+                    && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
+                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, category.data[obj.fields[i].depend]);
+                }
             }
         }
         this.setState({ form: this.props.category.data })
@@ -187,10 +187,17 @@ class Category extends Component {
         this.setState({ form: _.set({ ...this.state.form }, obj.field, changeCheckBoxValue) });
     };
     handleUploadChange = (e, field) => {
-        this.setState({ file: _.set({ ...this.state.file }, field, e.target.files[0]) })
+        const types = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+        if (types.every(type => e.target.files[0].type !== type)) {
+            this.props.showMessage({ message: Constants.MODAL.WRONG_FILE_TYPE, variant: Constants.VARIANT.ERROR });
+        }
+        else {
+            this.setState({ file: _.set({ ...this.state.file }, field, e.target.files[0]) })
+        }
     };
     fileUpload = (file) => {
         const formData = new FormData();
+
         formData.append('file', file);
 
         return Upload(formData);
@@ -198,11 +205,13 @@ class Category extends Component {
     uploadImage = async () => {
         for (var k in this.state.file) {
             if (typeof this.state.file[k] !== 'function') {
+
                 await this.fileUpload(this.state.file[k]).then((response) => {
                     this.setState({ ...this.state.form[k] = response.data }, function () {
                         delete this.state.file[k];
                     })
                 })
+
             }
         }
         this.setState({ file: null })
@@ -217,7 +226,7 @@ class Category extends Component {
     }
 
     render() {
-        const { classes, saveCategory, addCategory } = this.props;
+        const { classes } = this.props;
         const { form } = this.state;
         return (
             <FusePageCarded

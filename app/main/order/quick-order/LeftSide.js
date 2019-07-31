@@ -29,9 +29,10 @@ import {
     DialogActions
 } from '@material-ui/core';
 import { showMessage } from 'app/store/actions/fuse';
-import * as Actions from './store/actions';
+import * as Actions from '../store/actions';
 import Filter from 'app/main/shared/functions/filters';
 import classNames from 'classnames';
+import { privateDecrypt } from 'crypto';
 
 const styles = theme => ({
     root: {
@@ -70,6 +71,8 @@ class LeftSide extends Component {
         pricePicked: null,
         priceNamePicked: null,
         quantityPicked: null,
+        sizeIdPicked: null,
+        sizeNamePicked: '',
         description: '',
         open: false
     };
@@ -83,6 +86,21 @@ class LeftSide extends Component {
     componentDidUpdate(prevProps, prevState) {
         if (!_.isEqual(this.props.categories, prevProps.categories)) {
             this.setState({ categories: this.props.categories })
+        }
+        if (!_.isEqual(this.props.editOrder, prevProps.editOrder)) {
+            const steps = this.getSteps();
+            const { editOrder } = this.props;
+            this.setState({
+                categoryPicked: editOrder.CategoryId,
+                menuPicked: editOrder.MenuId,
+                menuNamePicked: editOrder.MenuIdName,
+                pricePicked: editOrder.MenuPriceId,
+                quantityPicked: editOrder.Quantity,
+                description: editOrder.Description,
+                sizeIdPicked: editOrder.SizeId,
+                sizeNamePicked: editOrder.SizeIdName,
+                activeStep: steps.length - 1
+            })
         }
     }
 
@@ -158,10 +176,12 @@ class LeftSide extends Component {
     }
     handlePriceClick = (id) => {
         if (id && id > 0) {
+            const sizeId = this.state.prices ? this.state.prices.find(x => x.Id == id).SizeId : null;
             const sizeName = this.state.prices ? this.state.prices.find(x => x.Id == id).SizeIdName : '';
             this.setState(state => ({
                 activeStep: state.activeStep + 1,
                 pricePicked: id,
+                sizeIdPicked: sizeId,
                 sizeNamePicked: sizeName
             }));
         }
@@ -259,7 +279,7 @@ class LeftSide extends Component {
                                     key={index}
                                     onClick={() => this.handleCategoryClick(c.Id)}
                                 >
-                                    <img src='http://react-material.fusetheme.com/assets/images/profile/a-walk-amongst-friends-small.jpg' alt={c.Name} />
+                                    <img src={c.Avatar && c.Avatar.length > 0 ? c.Avatar : '/static/images/grid-list/vegetables.jpg'} alt={c.Name} />
                                     <GridListTileBar
                                         title={c.Name}
                                         actionIcon={
@@ -287,7 +307,7 @@ class LeftSide extends Component {
                                     key={index}
                                     onClick={() => this.handleMenuClick(c.Id)}
                                 >
-                                    <img src='http://react-material.fusetheme.com/assets/images/profile/a-walk-amongst-friends-small.jpg' alt={c.Name} />
+                                    <img src={c.Image && c.Image.length > 0 ? c.Image : '/static/images/grid-list/vegetables.jpg'} alt={c.Name} />
                                     <GridListTileBar
                                         title={c.Name}
                                         actionIcon={
@@ -457,8 +477,8 @@ class LeftSide extends Component {
     }
 
     acceptOrder = () => {
-        const { categoryPicked, menuPicked, pricePicked, 
-            quantityPicked, description, menuNamePicked, sizeNamePicked } = this.state;
+        const { categoryPicked, menuPicked, pricePicked,
+            quantityPicked, description, menuNamePicked, sizeIdPicked, sizeNamePicked } = this.state;
         const price = this.state.prices && this.state.pricePicked ? this.state.prices.find(x => x.Id == this.state.pricePicked).Price : '';
         let obj = {
             CategoryId: categoryPicked,
@@ -466,7 +486,9 @@ class LeftSide extends Component {
             MenuIdName: menuNamePicked,
             MenuPriceId: pricePicked,
             Quantity: quantityPicked,
+            MenuPrice: price,
             Price: price * quantityPicked,
+            SizeId: sizeIdPicked,
             SizeIdName: sizeNamePicked,
             Description: description
         };
@@ -478,6 +500,7 @@ class LeftSide extends Component {
             menuNamePicked: '',
             pricePicked: null,
             quantityPicked: null,
+            sizeIdPicked: null,
             sizeNamePicked: '',
             description: '',
             activeStep: 0
@@ -552,7 +575,8 @@ function mapStateToProps({ auth, order }) {
         user: auth.user,
         categories: order.orders.categories,
         menus: order.orders.menus,
-        prices: order.orders.prices
+        prices: order.orders.prices,
+        editOrder: order.orders.editOrder
     }
 }
 

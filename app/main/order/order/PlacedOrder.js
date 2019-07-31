@@ -23,7 +23,7 @@ import * as Actions from '../store/actions';
 import reducer from '../store/reducers';
 import * as SharedActions from 'app/main/shared/options/store/actions';
 import SharedReducer from 'app/main/shared/options/store/reducers';
-import obj from './configs/price-config';
+import obj from './configs/config';
 import { showMessage } from 'app/store/actions/fuse';
 import PhotoCamera from '@material-ui/icons/PhotoCamera';
 import Upload from 'app/main/shared/functions/uploads';
@@ -69,11 +69,8 @@ const styles = theme => ({
     }
 });
 
-class Price extends Component {
-    constructor(props) {
-        super(props);
-        this.goBack = this.goBack.bind(this);
-    }
+class PlacedOrder extends Component {
+
     state = {
         form: null,
         isNew: false,
@@ -82,32 +79,44 @@ class Price extends Component {
 
     componentDidMount() {
         for (var i = 0; i < obj.fields.length; i++) {
-            if (obj.fields[i].type == "select" || obj.fields[i].type == "select2") {
-                if (obj.fields[i].field == 'SizeId') {
-                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, this.props.menu.data.RestaurantId);
+            if ((obj.fields[i].type == "select" || obj.fields[i].type == "select2") && !obj.fields[i].depend) {
+                if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
+                    && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
+                    this.props.getOptionsByKey(obj.fields[i].field, obj.fields[i].option);
                 }
             }
         }
-        this.updatePriceState();
+        this.updatePlacedOrderState();
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (!_.isEqual(this.props.location, prevProps.location)) {
-            this.updatePriceState();
+            this.updatePlacedOrderState();
         }
+
         if (
-            (this.props.price.data && !this.state.form) ||
-            (this.props.price.data && this.state.form && this.props.price.data.Id !== this.state.form.Id)
+            (this.props.placedOrder.data && !this.state.form) ||
+            (this.props.placedOrder.data && this.state.form && this.props.placedOrder.data.Id !== this.state.form.Id)
         ) {
             this.updateFormState();
         }
     };
 
     updateFormState = () => {
-        this.setState({ form: this.props.price.data })
+        const { placedOrder } = this.props;
+        // auto get depend option list in update item mode
+        for (var i = 0; i < obj.fields.length; i++) {
+            if (obj.fields[i].depend) {
+                if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
+                    && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
+                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, placedOrder.data[obj.fields[i].depend]);
+                }
+            }
+        }
+        this.setState({ form: this.props.placedOrder.data })
     };
 
-    updatePriceState = () => {
+    updatePlacedOrderState = () => {
         const { history, user } = this.props;
         const params = this.props.match.params;
         const { id } = params;
@@ -117,11 +126,9 @@ class Price extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.price.added = false;
-            this.props.newPrice();
-            this.setState({
-                isNew: true
-            })
+            this.props.placedOrder.added = false;
+            this.props.newPlacedOrder();
+            this.setState({ isNew: true })
         }
         else {
             if (!user.permissions.includes(obj.updatePermission)) {
@@ -129,7 +136,7 @@ class Price extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.getPrice(id);
+            this.props.getPlacedOrder(id);
         }
     };
 
@@ -148,11 +155,11 @@ class Price extends Component {
 
     canBeSubmitted() {
         if (this.state.isNew) {
-            return this.checkRequiredFields() && !this.props.price.added &&
-                !_.isEqual(this.props.price.data, this.state.form)
+            return this.checkRequiredFields() && !this.props.placedOrder.added &&
+                !_.isEqual(this.props.placedOrder.data, this.state.form)
         }
         return (this.checkRequiredFields() &&
-            !_.isEqual(this.props.price.data, this.state.form)) || this.state.file != null
+            !_.isEqual(this.props.placedOrder.data, this.state.form)) || this.state.file != null
     };
     checkRequiredFields = () => {
         let result = false;
@@ -207,21 +214,16 @@ class Price extends Component {
         this.setState({ file: null })
     }
     submit = async () => {
-        const { savePrice, addPrice, menu } = this.props;
+        const { savePlacedOrder, addPlacedOrder } = this.props;
         const { form } = this.state;
         if (this.state.file != null) {
             await this.uploadImage();
         }
-        form.RestaurantId = menu.data.RestaurantId;
-        form.MenuId = menu.data.Id;
-        this.state.isNew ? addPrice(form) : savePrice(form);
-    }
-    goBack() {
-        this.props.history.goBack()
+        this.state.isNew ? addPlacedOrder(form) : savePlacedOrder(form);
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, savePlacedOrder, addPlacedOrder } = this.props;
         const { form } = this.state;
         return (
             <FusePageCarded
@@ -236,7 +238,7 @@ class Price extends Component {
                             <div className="flex flex-col items-start max-w-full">
 
                                 <FuseAnimate animation="transition.slideRightIn" delay={300}>
-                                    <Typography className="normal-case flex items-center sm:mb-12" role="button" onClick={this.goBack}>
+                                    <Typography className="normal-case flex items-center sm:mb-12" component={Link} role="button" to={obj.baseRoute}>
                                         <Icon className="mr-4 text-20">arrow_back</Icon>
                                         {obj.appName}
                                     </Typography>
@@ -279,7 +281,6 @@ class Price extends Component {
                 content={
                     form && (
                         <div className="p-16 sm:p-24 max-w-2xl">
-
                             <div>
                                 {obj.fields.filter(f => this.state.isNew ? f.create : f.edit).map(f => {
                                     switch (f.type) {
@@ -464,6 +465,31 @@ class Price extends Component {
                                                     </FormControl>
                                                 )
                                             }
+                                        case "number":
+                                        case "money":
+                                            {
+                                                return (
+                                                    <TextField
+                                                        key={f.field}
+                                                        type="number"
+                                                        className="mt-8 mb-16"
+                                                        error={f.required ? form[f.field] === '' : false}
+                                                        required={f.required ? true : false}
+                                                        label={f.label}
+                                                        autoFocus={f.autoFocus ? f.autoFocus : false}
+                                                        placeholder={f.placeHolder ? f.placeHolder : ""}
+                                                        id={f.field}
+                                                        name={f.field}
+                                                        value={form[f.field] || 0}
+                                                        onChange={this.handleChange}
+                                                        variant="outlined"
+                                                        InputProps={{
+                                                            readOnly: this.state.isNew ? false : f.readOnly
+                                                        }}
+                                                        fullWidth
+                                                    />
+                                                )
+                                            }
                                         case "upload":
                                             {
                                                 let imagePreview = null;
@@ -502,30 +528,6 @@ class Price extends Component {
                                                     </div>
                                                 )
                                             }
-                                        case 'money':
-                                            {
-                                                return (
-                                                    <TextField
-                                                        key={f.field}
-                                                        type="number"
-                                                        className="mt-8 mb-16"
-                                                        error={f.required ? form[f.field] === '' : false}
-                                                        required={f.required ? true : false}
-                                                        label={f.label}
-                                                        autoFocus={f.autoFocus ? f.autoFocus : false}
-                                                        placeholder={f.placeHolder ? f.placeHolder : ""}
-                                                        id={f.field}
-                                                        name={f.field}
-                                                        value={form[f.field] || ''}
-                                                        onChange={this.handleChange}
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            readOnly: this.state.isNew ? false : f.readOnly
-                                                        }}
-                                                        fullWidth
-                                                    />
-                                                )
-                                            }
                                         default:
                                             {
                                                 return (
@@ -552,7 +554,6 @@ class Price extends Component {
                                     }
                                 })}
                             </div>
-
                         </div>
                     )
                 }
@@ -565,22 +566,21 @@ class Price extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         showMessage: showMessage,
-        getPrice: Actions.getPrice,
-        newPrice: Actions.newPrice,
-        addPrice: Actions.addPrice,
-        savePrice: Actions.savePrice,
+        getPlacedOrder: Actions.getPlacedOrder,
+        newPlacedOrder: Actions.newPlacedOrder,
+        addPlacedOrder: Actions.addPlacedOrder,
+        savePlacedOrder: Actions.savePlacedOrder,
         getOptionsByKey: SharedActions.getOptionsByKey,
         getOptionsByDependId: SharedActions.getOptionsByDependId
     }, dispatch);
 }
 
-function mapStateToProps({ category, options, auth }) {
+function mapStateToProps({ order, options, auth }) {
     return {
-        menu: category.menu,
-        price: category.price,
+        placedOrder: order.placedOrder,
         options: options,
         user: auth.user
     }
 }
 
-export default withReducer('options', SharedReducer)(withReducer('category', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Price)))));
+export default withReducer('options', SharedReducer)(withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(PlacedOrder)))));

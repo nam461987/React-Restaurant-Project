@@ -1,17 +1,18 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import * as userActions from 'app/auth/store/actions';
-import {bindActionCreators} from 'redux';
+import { bindActionCreators } from 'redux';
 import * as Actions from 'app/store/actions';
 import firebaseService from 'app/services/firebaseService';
 import auth0Service from 'app/services/auth0Service';
 import jwtService from 'app/services/jwtService';
 import loginService from 'app/services/loginService';
+import { showMessage } from 'app/store/actions/fuse';
+import Constants from 'app/shared/constants/constants';
 
 class Auth extends Component {
     /*eslint-disable-next-line no-useless-constructor*/
-    constructor(props)
-    {
+    constructor(props) {
         super(props);
 
         /**
@@ -41,11 +42,14 @@ class Auth extends Component {
         // });
 
         loginService.on('onAutoLogout', (message) => {
-            if ( message )
-            {
-                this.props.showMessage({message});
+            if (message) {
+                this.props.showMessage({ message });
             }
             this.props.logout();
+        });
+
+        loginService.on('onLoginFailed', () => {
+            this.props.showMessage({ message: Constants.MODAL.LOGIN_FAILED, variant: Constants.VARIANT.ERROR });
         });
 
         loginService.init();
@@ -54,7 +58,7 @@ class Auth extends Component {
     jwtCheck = () => {
         jwtService.on('onAutoLogin', () => {
 
-            this.props.showMessage({message: 'Logging in with JWT'});
+            this.props.showMessage({ message: 'Logging in with JWT' });
 
             /**
              * Sign in and retrieve user data from Api
@@ -63,17 +67,16 @@ class Auth extends Component {
                 .then(user => {
                     this.props.setUserData(user);
 
-                    this.props.showMessage({message: 'Logged in with JWT'});
+                    this.props.showMessage({ message: 'Logged in with JWT' });
                 })
                 .catch(error => {
-                    this.props.showMessage({message: error});
+                    this.props.showMessage({ message: error });
                 })
         });
 
         jwtService.on('onAutoLogout', (message) => {
-            if ( message )
-            {
-                this.props.showMessage({message});
+            if (message) {
+                this.props.showMessage({ message });
             }
             this.props.logout();
         });
@@ -85,9 +88,8 @@ class Auth extends Component {
 
         auth0Service.init();
 
-        if ( auth0Service.isAuthenticated() )
-        {
-            this.props.showMessage({message: 'Logging in with Auth0'});
+        if (auth0Service.isAuthenticated()) {
+            this.props.showMessage({ message: 'Logging in with Auth0' });
 
             /**
              * Retrieve user data from Auth0
@@ -96,7 +98,7 @@ class Auth extends Component {
 
                 this.props.setUserDataAuth0(tokenData);
 
-                this.props.showMessage({message: 'Logged in with Auth0'});
+                this.props.showMessage({ message: 'Logged in with Auth0' });
             })
         }
     };
@@ -106,9 +108,8 @@ class Auth extends Component {
         firebaseService.init();
 
         firebaseService.onAuthStateChanged(authUser => {
-            if ( authUser )
-            {
-                this.props.showMessage({message: 'Logging in with Firebase'});
+            if (authUser) {
+                this.props.showMessage({ message: 'Logging in with Firebase' });
 
                 /**
                  * Retrieve user data from Firebase
@@ -117,15 +118,14 @@ class Auth extends Component {
 
                     this.props.setUserDataFirebase(user, authUser);
 
-                    this.props.showMessage({message: 'Logged in with Firebase'});
+                    this.props.showMessage({ message: 'Logged in with Firebase' });
                 })
             }
         });
     };
 
-    render()
-    {
-        const {children} = this.props;
+    render() {
+        const { children } = this.props;
 
         return (
             <React.Fragment>
@@ -135,16 +135,15 @@ class Auth extends Component {
     }
 }
 
-function mapDispatchToProps(dispatch)
-{
+function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-            logout             : userActions.logoutUser,
-            setUserData        : userActions.setUserData,
-            setUserDataAuth0   : userActions.setUserDataAuth0,
-            setUserDataFirebase: userActions.setUserDataFirebase,
-            showMessage        : Actions.showMessage,
-            hideMessage        : Actions.hideMessage
-        },
+        logout: userActions.logoutUser,
+        setUserData: userActions.setUserData,
+        setUserDataAuth0: userActions.setUserDataAuth0,
+        setUserDataFirebase: userActions.setUserDataFirebase,
+        showMessage: Actions.showMessage,
+        hideMessage: Actions.hideMessage
+    },
         dispatch);
 }
 

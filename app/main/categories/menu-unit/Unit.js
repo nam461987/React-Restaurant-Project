@@ -187,7 +187,13 @@ class Unit extends Component {
         this.setState({ form: _.set({ ...this.state.form }, obj.field, changeCheckBoxValue) });
     };
     handleUploadChange = (e, field) => {
-        this.setState({ file: _.set({ ...this.state.file }, field, e.target.files[0]) })
+        const types = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+        if (types.every(type => e.target.files[0].type !== type)) {
+            this.props.showMessage({ message: Constants.MODAL.WRONG_FILE_TYPE, variant: Constants.VARIANT.ERROR });
+        }
+        else {
+            this.setState({ file: _.set({ ...this.state.file }, field, e.target.files[0]) })
+        }
     };
     fileUpload = (file) => {
         const formData = new FormData();

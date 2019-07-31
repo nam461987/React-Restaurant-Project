@@ -5,6 +5,7 @@ import * as Actions from 'app/store/actions';
 
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
+export const LOGOUT = 'LOGOUT';
 
 export function submitLogin({username, password})
 {
@@ -63,4 +64,8 @@ export function submitLoginWithFireBase({username, password})
                     payload: response
                 });
             });
+}
+export function logout()
+{
+    return {type: LOGOUT};
 }

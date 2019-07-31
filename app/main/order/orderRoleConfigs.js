@@ -9,7 +9,7 @@ export const orderRoleConfigs = {
                     display: false
                 },
                 toolbar       : {
-                    display: false
+                    display: true
                 },
                 footer        : {
                     display: false
@@ -26,8 +26,23 @@ export const orderRoleConfigs = {
     routes  : [
         {
             path     : '/orders/:id?',
+            authByStr: "quick_order_page",
             component: FuseLoadable({
-                loader: () => import('./Orders')
+                loader: () => import('./quick-order/Orders')
+            })
+        },
+        {
+            path     : '/order/waiting-orders',
+            authByStr: "waiting_order_list",
+            component: FuseLoadable({
+                loader: () => import('./waiting-list/WaitingOrders')
+            })
+        },
+        {
+            path     : '/order/add-more-orders/:id/:handle?',
+            authByStr: "placed_order_detail_create",
+            component: FuseLoadable({
+                loader: () => import('./add-more-order-detail/Orders')
             })
         }
     ]

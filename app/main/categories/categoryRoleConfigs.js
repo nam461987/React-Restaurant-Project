@@ -127,6 +127,19 @@ export const categoryRoleConfigs = {
             component: FuseLoadable({
                 loader: () => import('./table/SeatTables')
             })
+        },
+        {
+            path     : '/categories/order-processes/:id/:handle?',
+            component: FuseLoadable({
+                loader: () => import('./order-process/Process')
+            })
+        },
+        {
+            path     : '/categories/order-processes',
+            authByStr: "order_process_list",
+            component: FuseLoadable({
+                loader: () => import('./order-process/Processes')
+            })
         }
     ]
 };

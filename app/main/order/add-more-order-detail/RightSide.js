@@ -77,7 +77,6 @@ class RightSide extends Component {
     }
 
     handleRowClick = (index,obj) => {
-        console.log(index);
         this.props.setEditAddMoreOrder(index,obj);
     }
 
@@ -168,7 +167,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mapStateToProps({ auth, order }) {
-    console.log(order);
     return {
         user: auth.user,
         orders: order.addMoreOrders.addMoreOrders

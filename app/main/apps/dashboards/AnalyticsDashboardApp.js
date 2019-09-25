@@ -20,12 +20,22 @@ import reducer from './store/reducers';
 class AnalyticsDashboardApp extends Component {
 
     componentDidMount() {
-        if (!this.props.user.permissions.length > 0) {
+        if (!this.props.user.type > 0) {
             this.props.history.push({
                 pathname: '/login'
             });
         }
-        this.props.getWidgets();
+        else {
+            // if user has Chef Role, redirect to Kitchen screen
+            if (this.props.user.type == 6) {
+                this.props.history.push({
+                    pathname: '/order/waiting-orders'
+                });
+            }
+            else{
+                this.props.getWidgets();
+            }
+        }
     }
 
     render() {

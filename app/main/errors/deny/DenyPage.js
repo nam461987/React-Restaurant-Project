@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 class DenyPage extends Component {
     constructor(props) {
         super(props);
-        this.goBack = this.goBack.bind(this); // i think you are missing this
+        this.goBack = this.goBack.bind(this);
     }
 
     goBack() {
@@ -31,7 +31,7 @@ class DenyPage extends Component {
                     </Typography>
                     </FuseAnimate>
                     {/* <Button size="small" onClick={this.goBack} className="mb-16">Go back to previous page</Button> */}
-                    <Link className="font-medium" onClick={this.goBack}>Go back to previous page</Link>
+                    <a href="javascript:;" className="font-medium" onClick={this.goBack}>Go back to previous page</a>
                 </div>
             </div>
         );

@@ -14,9 +14,10 @@ import _ from '@lodash';
 import { FusePageSimple, FuseAnimate } from '@fuse';
 import withReducer from 'app/store/withReducer';
 import NavigationIcon from '@material-ui/icons/Navigation';
-import LeftSide from './LeftSide'
-import RightSide from './RightSide'
-import Modal from './Modal'
+import LeftSide from './LeftSide';
+import RightSide from './RightSide';
+import Modal from './Modal';
+import PrintOrderDialog from './PrintOrderDialog';
 import reducer from '../store/reducers';
 import * as Actions from '../store/actions';
 import { showMessage } from 'app/store/actions/fuse';
@@ -33,7 +34,7 @@ const styles = theme => ({
                 position: 'relative'
             }
         },
-        width: '70%',
+        width: '85%',
         height: '100%'
     },
     margin: {
@@ -46,7 +47,9 @@ const styles = theme => ({
 
 class SimpleFullWidthSample extends Component {
     state = {
-        orders: this.props.orders
+        orders: this.props.orders,
+        printOrderModalOpen: false,
+        cloneOrder: null
     };
 
     componentDidMount() {
@@ -68,23 +71,33 @@ class SimpleFullWidthSample extends Component {
     }
 
     handleSendOrder = async () => {
+        this.setState({
+            cloneOrder: Object.assign({}, this.props.order)
+        })
+        await this.props.addOrder(this.props.order);
         const { order, orders } = this.props;
-        await this.props.addOrder(order);
-
         if (order.Id && order.Id > 0) {
-            console.log(orders);
+            console.log('run success');
             for (let i = 0; i < orders.length; i++) {
-                console.log(orders[i]);
                 orders[i].PlacedOrderId = order.Id;
                 await this.props.addOrderDetail(orders[i]);
             }
-            this.props.setDefaultOrderValue();
-        this.props.setDefaultOrdersValue();
+            this.setState({
+                printOrderModalOpen: true,
+                cloneOrder: Object.assign(this.props.order, this.state.cloneOrder)
+            });
         }
         else {
+            console.log('run fail');
             this.props.showMessage({ message: Constants.MODAL.ADD_DATA_FAIL, variant: Constants.VARIANT.ERROR });
         }
         this.bothSideUpdated();
+    }
+
+    handlePrintOrder = () => {
+        this.props.setDefaultOrderValue();
+        this.props.setDefaultOrdersValue();
+        this.setState({ printOrderModalOpen: false })
     }
 
     canBeSent = () => {
@@ -101,15 +114,15 @@ class SimpleFullWidthSample extends Component {
                         root: classes.layoutRoot,
                         rightSidebar: "md:w-640 xl:w-640",
                         staticWidth: classes.sidebar,
-                        header: "h-100 min-h-100",
-                        sidebarHeader: "h-100 min-h-100"
+                        header: "h-100 min-h-100 flex flex-wrap content-center flex-row",
+                        sidebarHeader: "h-100 min-h-100 flex flex-wrap content-center flex-row"
                     }}
                     header={
                         <React.Fragment>
 
                             <div className="flex flex-col flex-1 p-8 sm:p-12 relative">
                                 <Hidden lgUp>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-end">
                                         <FuseAnimate animation="transition.expandIn" delay={200}>
                                             <IconButton onClick={(ev) => this.pageLayout.toggleRightSidebar()}
                                                 aria-label="open right sidebar">
@@ -118,9 +131,9 @@ class SimpleFullWidthSample extends Component {
                                         </FuseAnimate>
                                     </div>
                                 </Hidden>
-                                <div className="flex flex-1 items-end">
-                                    <Typography className='flex flex-1 pl-36 pb-12 text-16 sm:text-24'>
-                                        <span className="flex items-center">
+                                <div className="flex items-center justify-start">
+                                    <Typography className='pl-36 pb-12 text-16 sm:text-24'>
+                                        <span>
                                             {order && (order.OrderTypeId == 1 ?
                                                 <React.Fragment>
                                                     <span>{order.OrderTypeIdName}</span>
@@ -177,6 +190,8 @@ class SimpleFullWidthSample extends Component {
                     innerScroll
                 />
                 <Modal />
+                {this.state.printOrderModalOpen ? <PrintOrderDialog open={this.state.printOrderModalOpen} printAction={this.handlePrintOrder}
+                    order={{ ...this.state.cloneOrder }} orders={{ orders }} /> : null}
             </div>
         )
     }

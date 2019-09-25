@@ -56,6 +56,8 @@ class WaitingOrders extends Component {
     };
 
     componentDidMount() {
+        this.props.getWaitingOrders();
+        this.props.getWaitingOrdersDetail();
         this.interval = setInterval(() => {
             this.props.getWaitingOrders();
             this.props.getWaitingOrdersDetail();

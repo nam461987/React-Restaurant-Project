@@ -21,42 +21,9 @@ import { bindActionCreators } from 'redux';
 import connect from 'react-redux/es/connect/connect';
 import _ from '@lodash';
 import slugify from 'slugify';
-import ComponentTableHead from 'app/main/shared/components/TableHead';
+import ComponentTableHead from './TableHead';
 import * as Actions from '../store/actions';
 import Filter from 'app/main/shared/functions/filters';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-
-
-const StyledMenu = withStyles({
-    paper: {
-        border: '1px solid #d3d4d5',
-    },
-})(props => (
-    <Menu
-        elevation={0}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-        }}
-        transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-        }}
-        {...props}
-    />
-));
-
-const StyledMenuItem = withStyles(theme => ({
-    root: {
-        // '&:focus': {
-        //     backgroundColor: theme.palette.primary.main,
-        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-        //         color: theme.palette.common.white,
-        //     },
-        // },
-    }
-}))(MenuItem);
 
 class ComponentTable extends Component {
 
@@ -64,29 +31,19 @@ class ComponentTable extends Component {
         order: 'asc',
         orderBy: null,
         selected: [],
-        data: this.props.Items,
-        page: 0,
-        rowsPerPage: 10,
-        anchorEl: []
+        data: this.props.Items
     };
 
     componentDidMount() {
-        this.props.getPlacedOrders(this.state.page, this.state.rowsPerPage);
+        this.props.getOrderDetailByOrderId(this.props.match.params);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (!_.isEqual(this.props.Items.Items, prevProps.Items.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
+        if (!_.isEqual(this.props.Items, prevProps.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
             || !_.isEqual(this.props.page, prevProps.page)) {
             const data = this.getFilteredArray(this.props.Items, this.props.searchText);
             this.setState({ data })
         }
-    }
-
-    handleDropdownButtonClick = (event, id) => {
-        this.setState({ anchorEl: _.set({ ...this.state.anchorEl }, id, event.currentTarget) });
-    }
-    handleDropdownButtonClose = () => {
-        this.setState({ anchorEl: [] })
     }
 
     getFilteredArray = (data, searchText) => {
@@ -95,7 +52,7 @@ class ComponentTable extends Component {
         if (searchText.length === 0) {
             return newData;
         }
-        newData.Items = _.filter(newData.Items, item => {
+        newData = _.filter(newData, item => {
             for (var i = 0; i < listObj.length; i++) {
                 if (item[listObj[i].field] != null &&
                     item[listObj[i].field].toString().toLowerCase().includes(searchText.toString().toLowerCase())) {
@@ -124,15 +81,18 @@ class ComponentTable extends Component {
     }
     handleSelectAllClick = event => {
         if (event.target.checked) {
-            this.setState(state => ({ selected: this.state.data.Items.map(n => ({ id: n.Id, status: n.Status })) }));
+            this.setState(state => ({
+                selected: Object.keys(this.state.data).map((n, index) => ({
+                    id: n.Id, status: n.Status, parentId: n.PlacedOrderId
+                }))
+            }));
             return;
         }
         this.setState({ selected: [] });
     };
 
     handleClick = (item, route) => {
-        // this.props.history.push(route + item.Id + '/' + slugify(item[this.props.obj.urlName], { replacement: '-', remove: null, lower: true }));
-        this.props.history.push('/payment/order/' + item.Id);
+        this.props.history.push(route + item.Id + '/' + slugify(item[this.props.obj.urlName], { replacement: '-', remove: null, lower: true }));
     };
 
     handleCheck = (event, obj) => {
@@ -158,34 +118,8 @@ class ComponentTable extends Component {
         this.setState({ selected: newSelected });
     };
 
-    handleChangePage = (event, page) => {
-        this.props.getPlacedOrders(page, this.state.rowsPerPage);
-        this.setState({ page, selected: [] });
-    };
-
-    handleChangeRowsPerPage = event => {
-        this.props.getPlacedOrders(0, event.target.value);
-        this.setState({ rowsPerPage: event.target.value, selected: [] });
-    };
-
     isSelected = obj => this.state.selected.findIndex(x => x.id === obj.id) !== -1;
 
-    handleAddMoreOrderClick = (item) => {
-        this.props.history.push('/order/add-more-orders/' + item.Id + '/' + slugify(item.Code, { replacement: '-', remove: null, lower: true }));
-    };
-    handleViewSummaryClick = (item) => {
-        this.props.history.push('/placed-orders/summary/' + item.Id);
-    }
-    handleCancelOrderClick = async (item) => {
-        let result = window.confirm("Are you sure cancel this order?");
-        if (result) {
-            await this.props.cancelPlacedOrder(item.Id);
-            this.props.getPlacedOrders(this.state.page, this.state.rowsPerPage);
-        }
-    }
-    handleOrderDetailsClick = (item) => {
-        this.props.history.push('/placed-orders/details/' + item.Id);
-    }
     render() {
         const { obj, setStatus, user } = this.props;
         const { order, orderBy, selected, rowsPerPage, page, data } = this.state;
@@ -211,7 +145,7 @@ class ComponentTable extends Component {
                         />
 
                         <TableBody>
-                            {_.orderBy(data.Items, [
+                            {_.orderBy(data, [
                                 (o) => {
                                     switch (orderBy) {
                                         case 'categories':
@@ -227,7 +161,7 @@ class ComponentTable extends Component {
                             ], [order])
                                 // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map(n => {
-                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status });
+                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status, parentId: n.PlacedOrderId });
 
                                     return (
                                         <TableRow
@@ -238,13 +172,14 @@ class ComponentTable extends Component {
                                             tabIndex={-1}
                                             key={n.Id}
                                             selected={isSelected}
-                                            onClick={event => this.handleClick(n, obj.baseRoute)}
+                                            // onClick={event => this.handleClick(n, obj.baseRoute)}
                                         >
                                             <TableCell className="w-48 pl-4 sm:pl-12" padding="checkbox">
                                                 <Checkbox
                                                     checked={isSelected}
                                                     onClick={event => event.stopPropagation()}
-                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status })}
+                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status, parentId: n.PlacedOrderId })}
+                                                    disabled={n.IsFinish ? true : false}
                                                 />
                                             </TableCell>
 
@@ -333,61 +268,6 @@ class ComponentTable extends Component {
                                                     })
                                                 )
                                             })}
-                                            {/* {user.permissions.includes('placed_order_detail_create') ?
-                                                <TableCell component="th" scope="row" align="center"
-                                                    onClick={event => event.stopPropagation()}>
-                                                    <Icon onClick={event => this.handleAddMoreOrderClick(n)} className="text-20">add_circle_outline</Icon>
-                                                </TableCell>
-                                                :
-                                                <TableCell component="th" scope="row" align="center"></TableCell>
-                                            } */}
-                                            <TableCell component="th" scope="row" align="center"
-                                                onClick={event => event.stopPropagation()}>
-                                                <IconButton
-                                                    aria-label="more"
-                                                    aria-controls="long-menu"
-                                                    aria-haspopup="true"
-                                                    onClick={event => this.handleDropdownButtonClick(event, n.Id)}
-                                                >
-                                                    <MoreVertIcon />
-                                                </IconButton>
-                                                <StyledMenu
-                                                    anchorEl={this.state.anchorEl[n.Id]}
-                                                    keepMounted
-                                                    open={Boolean(this.state.anchorEl[n.Id])}
-                                                    onClose={event => this.handleDropdownButtonClose()}
-                                                >
-                                                    {user.permissions.includes('placed_order_detail_create') ?
-                                                        <StyledMenuItem onClick={event => this.handleAddMoreOrderClick(n)}>
-                                                            <ListItemIcon>
-                                                                <Icon>add_circle_outline</Icon>
-                                                            </ListItemIcon>
-                                                            <ListItemText primary="Order more" />
-                                                        </StyledMenuItem>
-                                                        : null}
-                                                    <StyledMenuItem onClick={event => this.handleViewSummaryClick(n)}>
-                                                        <ListItemIcon>
-                                                            <Icon>visibility</Icon>
-                                                        </ListItemIcon>
-                                                        <ListItemText primary="View Summary" />
-                                                    </StyledMenuItem>
-                                                    {n.OrderProcessId && n.OrderProcessId != 9 &&
-                                                        <StyledMenuItem onClick={event => this.handleCancelOrderClick(n)}>
-                                                            <ListItemIcon>
-                                                                <Icon>clear</Icon>
-                                                            </ListItemIcon>
-                                                            <ListItemText primary="Cancel Order" />
-                                                        </StyledMenuItem>}
-                                                    {user.permissions.includes('placed_order_detail_list') ?
-                                                        <StyledMenuItem onClick={event => this.handleOrderDetailsClick(n)}>
-                                                            <ListItemIcon>
-                                                                <Icon>add_circle_outline</Icon>
-                                                            </ListItemIcon>
-                                                            <ListItemText primary="Order Details" />
-                                                        </StyledMenuItem>
-                                                        : null}
-                                                </StyledMenu>
-                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -395,20 +275,7 @@ class ComponentTable extends Component {
                     </Table>
                 </FuseScrollbars>
 
-                <TablePagination
-                    component="div"
-                    count={data.TotalItems != null ? data.TotalItems : 0}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    backIconButtonProps={{
-                        'aria-label': 'Previous Page'
-                    }}
-                    nextIconButtonProps={{
-                        'aria-label': 'Next Page'
-                    }}
-                    onChangePage={this.handleChangePage}
-                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
-                />
+
             </div>
         );
     }
@@ -416,15 +283,15 @@ class ComponentTable extends Component {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        getPlacedOrders: Actions.getPlacedOrders,
-        setStatus: Actions.setPlacedOrderstatus,
-        cancelPlacedOrder: Actions.cancelPlacedOrder
+        setStatus: Actions.setPlacedOrderDetailstatus,
+        getOrderDetailByOrderId: Actions.getOrderDetailByOrderId
     }, dispatch);
 }
 
 function mapStateToProps({ order, SharedReducers, auth }) {
+    console.log(order);
     return {
-        Items: order.placedOrders.data,
+        Items: order.summary.orderDetails,
         searchText: SharedReducers.searchText.searchText,
         user: auth.user
     }

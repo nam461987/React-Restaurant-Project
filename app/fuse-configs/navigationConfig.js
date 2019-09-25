@@ -15,10 +15,10 @@ const navigationConfig = [
         ]
     },
     {
-
         'id': 'datas',
         'title': 'Datas',
         'type': 'group',
+        'authByStr': 'category_see',
         'icon': 'apps',
         'children': [
             {
@@ -124,7 +124,7 @@ const navigationConfig = [
                     },
                     {
                         'id': 'placed-order-component',
-                        'title': 'Order',
+                        'title': 'Order List',
                         'type': 'item',
                         'authByStr': 'placed_order_list',
                         'url': '/order/placed-orders'

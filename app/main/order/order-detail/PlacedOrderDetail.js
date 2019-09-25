@@ -69,7 +69,7 @@ const styles = theme => ({
     }
 });
 
-class PlacedOrder extends Component {
+class PlacedOrderDetail extends Component {
 
     state = {
         form: null,
@@ -86,37 +86,37 @@ class PlacedOrder extends Component {
                 }
             }
         }
-        this.updatePlacedOrderState();
+        this.updatePlacedOrderDetailState();
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (!_.isEqual(this.props.location, prevProps.location)) {
-            this.updatePlacedOrderState();
+            this.updatePlacedOrderDetailState();
         }
 
         if (
-            (this.props.placedOrder.data && !this.state.form) ||
-            (this.props.placedOrder.data && this.state.form && this.props.placedOrder.data.Id !== this.state.form.Id)
+            (this.props.placedOrderDetail.data && !this.state.form) ||
+            (this.props.placedOrderDetail.data && this.state.form && this.props.placedOrderDetail.data.Id !== this.state.form.Id)
         ) {
             this.updateFormState();
         }
     };
 
     updateFormState = () => {
-        const { placedOrder } = this.props;
+        const { placedOrderDetail } = this.props;
         // auto get depend option list in update item mode
         for (var i = 0; i < obj.fields.length; i++) {
             if (obj.fields[i].depend) {
                 if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
                     && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
-                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, placedOrder.data[obj.fields[i].depend]);
+                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, placedOrderDetail.data[obj.fields[i].depend]);
                 }
             }
         }
-        this.setState({ form: this.props.placedOrder.data })
+        this.setState({ form: this.props.placedOrderDetail.data })
     };
 
-    updatePlacedOrderState = () => {
+    updatePlacedOrderDetailState = () => {
         const { history, user } = this.props;
         const params = this.props.match.params;
         const { id } = params;
@@ -126,8 +126,8 @@ class PlacedOrder extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.placedOrder.added = false;
-            this.props.newPlacedOrder();
+            this.props.placedOrderDetail.added = false;
+            this.props.newPlacedOrderDetail();
             this.setState({ isNew: true })
         }
         else {
@@ -136,7 +136,7 @@ class PlacedOrder extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.getPlacedOrder(id);
+            this.props.getPlacedOrderDetail(id);
         }
     };
 
@@ -155,11 +155,11 @@ class PlacedOrder extends Component {
 
     canBeSubmitted() {
         if (this.state.isNew) {
-            return this.checkRequiredFields() && !this.props.placedOrder.added &&
-                !_.isEqual(this.props.placedOrder.data, this.state.form)
+            return this.checkRequiredFields() && !this.props.placedOrderDetail.added &&
+                !_.isEqual(this.props.placedOrderDetail.data, this.state.form)
         }
         return (this.checkRequiredFields() &&
-            !_.isEqual(this.props.placedOrder.data, this.state.form)) || this.state.file != null
+            !_.isEqual(this.props.placedOrderDetail.data, this.state.form)) || this.state.file != null
     };
     checkRequiredFields = () => {
         let result = false;
@@ -214,16 +214,16 @@ class PlacedOrder extends Component {
         this.setState({ file: null })
     }
     submit = async () => {
-        const { savePlacedOrder, addPlacedOrder } = this.props;
+        const { savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
         const { form } = this.state;
         if (this.state.file != null) {
             await this.uploadImage();
         }
-        this.state.isNew ? addPlacedOrder(form) : savePlacedOrder(form);
+        this.state.isNew ? addPlacedOrderDetail(form) : savePlacedOrderDetail(form);
     }
 
     render() {
-        const { classes, savePlacedOrder, addPlacedOrder } = this.props;
+        const { classes, savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
         const { form } = this.state;
         return (
             <FusePageCarded
@@ -566,10 +566,10 @@ class PlacedOrder extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         showMessage: showMessage,
-        getPlacedOrder: Actions.getPlacedOrder,
-        newPlacedOrder: Actions.newPlacedOrder,
-        addPlacedOrder: Actions.addPlacedOrder,
-        savePlacedOrder: Actions.savePlacedOrder,
+        getPlacedOrderDetail: Actions.getPlacedOrderDetail,
+        newPlacedOrderDetail: Actions.newPlacedOrderDetail,
+        addPlacedOrderDetail: Actions.addPlacedOrderDetail,
+        savePlacedOrderDetail: Actions.savePlacedOrderDetail,
         getOptionsByKey: SharedActions.getOptionsByKey,
         getOptionsByDependId: SharedActions.getOptionsByDependId
     }, dispatch);
@@ -577,10 +577,10 @@ function mapDispatchToProps(dispatch) {
 
 function mapStateToProps({ order, options, auth }) {
     return {
-        placedOrder: order.placedOrder,
+        placedOrderDetail: order.placedOrderDetail,
         options: options,
         user: auth.user
     }
 }
 
-export default withReducer('options', SharedReducer)(withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(PlacedOrder)))));
+export default withReducer('options', SharedReducer)(withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(PlacedOrderDetail)))));

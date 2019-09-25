@@ -11,16 +11,15 @@ export function addOrder(data) {
     const request = AxiosConfig.post(Constants.API_PLACED_ORDER.order, data);
 
     return (dispatch) =>
-        request.then((response) =>
-        {
-            if(response.data){
-                data.Id= response.data;
+        request.then((response) => {
+            if (response.data) {
+                data = response.data;
                 dispatch({
                     type: ADD_ORDER,
                     payload: data
                 })
             }
-            else{
+            else {
                 dispatch(newOrder())
             }
         });

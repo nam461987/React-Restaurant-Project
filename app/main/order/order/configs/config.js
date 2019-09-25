@@ -28,8 +28,8 @@ obj.OrderType = [
 
 obj.fields = [
     { field: "Id", label: "#", create: false, edit: true, list: false, type: "hidden", align: 'left', disablePadding: true, sort: false, required: true },
-    { field: "RestaurantId", label: "Restaurant", view: 'Name', create: true, edit: true, list: true, type: 'select', option: '/option/getrestaurant', align: 'left', disablePadding: false, sort: true, required: true },
-    { field: "BranchId", label: "Branch", view: 'Name', depend: 'RestaurantId', create: true, edit: true, list: true, type: 'select', option: '/option/getbranch', align: 'left', disablePadding: false, sort: true, required: true },
+    { field: "RestaurantId", label: "Restaurant", view: 'Name', create: true, edit: false, list: true, type: 'select', option: '/option/getrestaurant', align: 'left', disablePadding: false, sort: true, required: true },
+    { field: "BranchId", label: "Branch", view: 'Name', depend: 'RestaurantId', create: true, edit: false, list: true, type: 'select', option: '/option/getbranch', align: 'left', disablePadding: false, sort: true, required: true },
     { field: "OrderTypeId", label: "Order Type", view: 'Name', create: true, edit: true, list: true, type: 'select', option: obj.OrderType, align: 'left', disablePadding: false, sort: true },
     { field: "CustomerId", label: "Customer", view: 'Name', create: true, edit: true, list: false, type: 'select', option: '/option/getcustomer', align: 'left', disablePadding: false, sort: true },
     { field: "OrderChannelId", label: "Order Channel", view: 'Name', create: true, edit: true, list: true, type: 'select', option: '/option/getorderchannel', align: 'left', disablePadding: false, sort: true },

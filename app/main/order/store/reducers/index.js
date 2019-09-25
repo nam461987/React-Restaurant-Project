@@ -5,6 +5,7 @@ import placedOrders from './placedorders.reducer';
 import placedOrder from './placedorder.reducer';
 import waitingOrder from './waitingorder.reducer';
 import addMoreOrders from './addmoreorders.reducer';
+import summary from './summary.reducer';
 
 const reducer = combineReducers({
     orders,
@@ -12,7 +13,8 @@ const reducer = combineReducers({
     placedOrders,
     placedOrder,
     waitingOrder,
-    addMoreOrders
+    addMoreOrders,
+    summary
 });
 
 export default reducer;

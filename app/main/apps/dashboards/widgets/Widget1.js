@@ -43,8 +43,8 @@ class Widget1 extends Component {
 
                         <FuseAnimate delay={100}>
                             <div className="flex-col">
-                                <Typography className="h2">Visitors</Typography>
-                                <Typography className="h5" color="textSecondary">Unique visitors by month</Typography>
+                                <Typography className="h2">Revenue</Typography>
+                                <Typography className="h5" color="textSecondary">revenue by month</Typography>
                             </div>
                         </FuseAnimate>
 

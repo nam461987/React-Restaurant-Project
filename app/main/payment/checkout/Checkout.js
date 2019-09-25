@@ -13,16 +13,15 @@ import {
 import _ from '@lodash';
 import { FusePageSimple, FuseAnimate } from '@fuse';
 import withReducer from 'app/store/withReducer';
-import NavigationIcon from '@material-ui/icons/Navigation';
-import LeftSide from './LeftSide'
-import RightSide from './RightSide'
-import reducer from '../store/reducers';
-import * as Actions from '../store/actions';
+import LeftSide from './LeftSide';
+import RightSide from './RightSide';
 import { showMessage } from 'app/store/actions/fuse';
 import Constants from 'app/shared/constants/constants';
 
 const styles = theme => ({
-    layoutRoot: {},
+    layoutRoot: {
+        minHeight: "100vh"
+    },
     sidebar: {
         position: 'absolute',
         '&.permanent': {
@@ -43,52 +42,30 @@ const styles = theme => ({
     }
 });
 
-class AddMoreOrderDetail extends Component {
+class Checkout extends Component {
     state = {
-        orders: this.props.orders
+
     };
 
     componentDidMount() {
-        this.props.setDefaultAddMoreOrdersValue();
     };
 
     componentDidUpdate(prevProps, prevState) {
-        if (!_.isEqual(this.props.orders, prevProps.orders)) {
-            this.setState({ orders: this.props.orders })
-        }
+        // if (!_.isEqual(this.props.orders, prevProps.orders)) {
+        //     this.setState({ orders: this.props.orders })
+        // }
+        // if (!_.isEqual(this.props.order, prevProps.order)) {
+        //     this.setState({ order: this.props.order })
+        // }
     }
 
-    bothSideUpdated = () => {
-        this.setState({ orders: this.props.orders })
-    }
-
-    handleSendOrder = async () => {
-        const { orders } = this.props;
-
-        const params = this.props.match.params;
-        const { id } = params;
-
-        if (id > 0) {
-            for (let i = 0; i < orders.length; i++) {
-                orders[i].PlacedOrderId = id;
-                await this.props.addOrderDetail(orders[i]);
-            }
-            this.props.setOrderMoreOrderProcess(id);
-            this.props.setDefaultAddMoreOrdersValue();
-        }
-        else {
-            this.props.showMessage({ message: Constants.MODAL.ADD_DATA_FAIL, variant: Constants.VARIANT.ERROR });
-        }
-        this.bothSideUpdated();
-    }
-
-    canBeSent = () => {
-        return this.props.orders.length > 0;
+    handlePaymentClick = () => {
+        return null;
     }
 
     render() {
         const { classes } = this.props;
-        const { orders } = this.state;
+        const { } = this.state;
         return (
             <div>
                 <FusePageSimple
@@ -96,15 +73,15 @@ class AddMoreOrderDetail extends Component {
                         root: classes.layoutRoot,
                         rightSidebar: "md:w-640 xl:w-640",
                         staticWidth: classes.sidebar,
-                        header: "h-100 min-h-100",
-                        sidebarHeader: "h-100 min-h-100"
+                        header: "min-h-72 flex flex-wrap content-center flex-row",
+                        sidebarHeader: "min-h-72 flex flex-wrap content-center flex-row"
                     }}
                     header={
                         <React.Fragment>
 
                             <div className="flex flex-col flex-1 p-8 sm:p-12 relative">
                                 <Hidden lgUp>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-end">
                                         <FuseAnimate animation="transition.expandIn" delay={200}>
                                             <IconButton onClick={(ev) => this.pageLayout.toggleRightSidebar()}
                                                 aria-label="open right sidebar">
@@ -119,7 +96,7 @@ class AddMoreOrderDetail extends Component {
                         </React.Fragment>
                     }
                     content={
-                        <LeftSide refresh={this.bothSideUpdated} />
+                        <LeftSide />
                     }
                     rightSidebarHeader={
                         <div className="flex flex-col flex-1 p-8 sm:p-12 relative">
@@ -127,19 +104,27 @@ class AddMoreOrderDetail extends Component {
                                 <Fab
                                     variant="extended"
                                     size="medium"
-                                    color="secondary"
                                     aria-label="Add"
-                                    disabled={!this.canBeSent()}
-                                    onClick={event => this.handleSendOrder()}
+                                    className="bg-blue-dark text-white mr-8"
+                                    onClick={event => this.handlePaymentClick()}
                                 >
-                                    <NavigationIcon className={classes.extendedIcon} />
-                                    Add Order
+                                    <Icon className={classes.extendedIcon}>print</Icon>
+                                    Re-Print Bill
+                            </Fab>
+                                <Fab
+                                    variant="extended"
+                                    size="medium"
+                                    aria-label="Add"
+                                    className="bg-green text-white"
+                                >
+                                    <Icon className={classes.extendedIcon}>payment</Icon>
+                                    Payment
                             </Fab>
                             </div>
                         </div>
                     }
                     rightSidebarContent={
-                        <RightSide data={{ orders }} refresh={this.bothSideUpdated} />
+                        <RightSide />
                     }
                     onRef={instance => {
                         this.pageLayout = instance;
@@ -153,17 +138,13 @@ class AddMoreOrderDetail extends Component {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        showMessage: showMessage,
-        addOrderDetail: Actions.addOrderDetail,
-        setDefaultAddMoreOrdersValue: Actions.setDefaultAddMoreOrdersValue,
-        setOrderMoreOrderProcess:Actions.setOrderMoreOrderProcess
+        showMessage: showMessage
     }, dispatch);
 }
 
 function mapStateToProps({ order }) {
     return {
-        orders: order.addMoreOrders.addMoreOrders
     }
 }
 
-export default (withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(AddMoreOrderDetail)))));
+export default withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Checkout)));

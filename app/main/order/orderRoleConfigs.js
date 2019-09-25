@@ -15,7 +15,7 @@ export const orderRoleConfigs = {
                     display: false
                 },
                 leftSidePanel : {
-                    display: false
+                    display: true
                 },
                 rightSidePanel: {
                     display: false

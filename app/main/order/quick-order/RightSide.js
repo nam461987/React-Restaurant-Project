@@ -102,7 +102,7 @@ class RightSide extends Component {
                 <Table className={classes.table}>
                     <TableHead>
                         <TableRow>
-                            <TableCell style={{ width: '10%' }}></TableCell>
+                            <TableCell padding="checkbox"></TableCell>
                             <TableCell colSpan={2}>Name</TableCell>
                             <TableCell align="right">Price</TableCell>
                         </TableRow>
@@ -111,7 +111,7 @@ class RightSide extends Component {
                         {this.props.orders.length > 0 ? this.props.orders.map((item, index) =>
                             (
                                 <TableRow hover key={index} onClick={event => this.handleRowClick(index,item)}>
-                                    <TableCell align="left" style={{ width: '10%' }}
+                                    <TableCell align="left"  padding="checkbox" 
                                         onClick={event => event.stopPropagation()}>
                                         <IconButton onClick={event => this.handleDeleteOrder(index)} color="secondary" aria-label="delete this order">
                                             <Icon fontSize="small" className="text-red">clear</Icon>

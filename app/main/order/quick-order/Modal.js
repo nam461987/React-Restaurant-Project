@@ -17,7 +17,8 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    Grid
+    Grid,
+    Divider
 } from '@material-ui/core';
 import { showMessage } from 'app/store/actions/fuse';
 import * as Actions from '../store/actions';
@@ -62,6 +63,7 @@ class Modal extends Component {
         OrderTypeIdName: '',
         CustomerIdName: '',
         CustomerName: '',
+        CustomerPhone: '',
         OrderChannelIdName: '',
         TableIdName: '',
         OrderTime: null,
@@ -124,8 +126,7 @@ class Modal extends Component {
             let result = window.confirm("Are you sure?");
             if (result) {
                 const { OrderTypeId, CustomerId, OrderChannelId, TableId, PeopleNum, OrderTypeIdName, CustomerIdName,
-                    CustomerName, OrderChannelIdName, TableIdName, Description } = this.state;
-                console.log(this.state);
+                    CustomerName,CustomerPhone, OrderChannelIdName, TableIdName, Description } = this.state;
                 let obj = {
                     OrderTypeId: OrderTypeId,
                     CustomerId: CustomerId,
@@ -135,6 +136,7 @@ class Modal extends Component {
                     OrderTypeIdName: OrderTypeIdName,
                     CustomerIdName: CustomerIdName,
                     CustomerName: CustomerName,
+                    CustomerPhone:CustomerPhone,
                     OrderChannelIdName: OrderChannelIdName,
                     TableIdName: TableIdName,
                     Description: Description
@@ -149,6 +151,7 @@ class Modal extends Component {
                     OrderTypeIdName: '',
                     CustomerIdName: '',
                     CustomerName: '',
+                    CustomerPhone:'',
                     OrderChannelIdName: '',
                     TableIdName: '',
                     Description: '',
@@ -178,13 +181,15 @@ class Modal extends Component {
                     else if (OrderTypeId == 2) {
                         this.setState(() => ({
                             activeStep: step - 1,
-                            CustomerName: ''
+                            CustomerName: '',
+                            CustomerPhone:''
                         }));
                     }
                     else if (OrderTypeId == 3) {
                         this.setState(() => ({
                             activeStep: step - 1,
                             CustomerName: '',
+                            CustomerPhone:'',
                             CustomerId: null,
                             CustomerIdName: ''
                         }));
@@ -239,7 +244,7 @@ class Modal extends Component {
     };
 
     getSteps = () => {
-        const { OrderTypeId, OrderTypeIdName, PeopleNum, CustomerName, CustomerId } = this.state;
+        const { OrderTypeId, OrderTypeIdName, PeopleNum, CustomerName,CustomerPhone, CustomerId } = this.state;
         if (!OrderTypeId) {
             return ['Select Order Type']
         }
@@ -252,7 +257,7 @@ class Modal extends Component {
         // To Go
         else if (OrderTypeId == 2) {
             return [OrderTypeId ? 'Selected ' + OrderTypeIdName : 'Select Order Type',
-            CustomerName ? CustomerName : 'Enter Customer Name',
+            CustomerName ? CustomerName : 'Enter Customer Info',
                 'Decription']
         }
         // Delivery
@@ -264,7 +269,7 @@ class Modal extends Component {
     }
 
     getStepContent = (step) => {
-        const { OrderTypeId, PeopleNum, CustomerName, CustomerId, TableId,
+        const { OrderTypeId, PeopleNum, CustomerName,CustomerPhone, CustomerId, TableId,
             OrderChannelId } = this.state;
         const { orderChannels, customers, tables } = this.props;
         switch (step) {
@@ -337,6 +342,16 @@ class Modal extends Component {
                                     variant="outlined"
                                     fullWidth
                                 />
+                                <TextField
+                                    className="mt-8 mb-16"
+                                    onChange={this.handleChange}
+                                    label="Customer Phone"
+                                    name="CustomerPhone"
+                                    type="text"
+                                    value={CustomerPhone || ''}
+                                    variant="outlined"
+                                    fullWidth
+                                />
                                 <Button
                                     variant="contained"
                                     color="primary"
@@ -369,6 +384,9 @@ class Modal extends Component {
                                     options={customerOptions}
                                     fullWidth
                                 />
+                                <Divider variant="inset" />
+                                <Typography variant="h6" gutterBottom>OR</Typography>
+                                <Divider variant="inset" />
                                 <TextField
                                     className="mt-8 mb-16"
                                     onChange={this.handleChange}
@@ -376,6 +394,16 @@ class Modal extends Component {
                                     name="CustomerName"
                                     type="text"
                                     value={CustomerName || ''}
+                                    variant="outlined"
+                                    fullWidth
+                                />
+                                <TextField
+                                    className="mt-8 mb-16"
+                                    onChange={this.handleChange}
+                                    label="Customer Phone"
+                                    name="CustomerPhone"
+                                    type="text"
+                                    value={CustomerPhone || ''}
                                     variant="outlined"
                                     fullWidth
                                 />

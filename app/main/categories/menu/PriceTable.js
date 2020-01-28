@@ -1,5 +1,19 @@
 import React, { Component } from 'react';
-import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox } from '@material-ui/core';
+import {
+    Icon,
+    Table,
+    TableBody,
+    TableCell,
+    TablePagination,
+    TableRow,
+    Checkbox,
+    IconButton,
+    withStyles,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText
+} from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
@@ -9,6 +23,38 @@ import slugify from 'slugify';
 import ComponentTableHead from 'app/main/shared/components/TableHead';
 import * as Actions from '../store/actions';
 import Filter from 'app/main/shared/functions/filters';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+
+const StyledMenu = withStyles({
+    paper: {
+        border: '1px solid #d3d4d5',
+    },
+})(props => (
+    <Menu
+        elevation={0}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+        }}
+        transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+        }}
+        {...props}
+    />
+));
+
+const StyledMenuItem = withStyles(theme => ({
+    root: {
+        // '&:focus': {
+        //     backgroundColor: theme.palette.primary.main,
+        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+        //         color: theme.palette.common.white,
+        //     },
+        // },
+    }
+}))(MenuItem);
 
 class ComponentTable extends Component {
     constructor(props) {
@@ -20,7 +66,8 @@ class ComponentTable extends Component {
         selected: [],
         data: this.props.Items,
         page: 0,
-        rowsPerPage: 25
+        rowsPerPage: 25,
+        anchorEl: []
     };
 
     componentDidMount() {
@@ -113,10 +160,21 @@ class ComponentTable extends Component {
         this.setState({ rowsPerPage: event.target.value, selected: [] });
     };
 
+    handleDropdownButtonClick = (event, id) => {
+        this.setState({ anchorEl: _.set({ ...this.state.anchorEl }, id, event.currentTarget) });
+    }
+    handleDropdownButtonClose = () => {
+        this.setState({ anchorEl: [] })
+    }
+
+    handleDefineMenuClick = (item) => {
+        this.props.history.push('/categories/menu-defines/' + item.MenuId + '/' + item.SizeId);
+    };
+
     isSelected = obj => this.state.selected.findIndex(x => x.id === obj.id) !== -1;
 
     render() {
-        const { obj, setStatus } = this.props;
+        const { obj, setStatus, user } = this.props;
         const { order, orderBy, selected, rowsPerPage, page, data } = this.state;
         return (
             <div className="w-full flex flex-col">
@@ -253,6 +311,32 @@ class ComponentTable extends Component {
                                                     })
                                                 )
                                             })}
+                                            <TableCell component="th" scope="row" align="center"
+                                                onClick={event => event.stopPropagation()}>
+                                                <IconButton
+                                                    aria-label="more"
+                                                    aria-controls="long-menu"
+                                                    aria-haspopup="true"
+                                                    onClick={event => this.handleDropdownButtonClick(event, n.Id)}
+                                                >
+                                                    <MoreVertIcon />
+                                                </IconButton>
+                                                <StyledMenu
+                                                    anchorEl={this.state.anchorEl[n.Id]}
+                                                    keepMounted
+                                                    open={Boolean(this.state.anchorEl[n.Id])}
+                                                    onClose={event => this.handleDropdownButtonClose()}
+                                                >
+                                                    {user.permissions.includes('menu_definition_create') ?
+                                                        <StyledMenuItem onClick={event => this.handleDefineMenuClick(n)}>
+                                                            <ListItemIcon>
+                                                                <Icon>add_circle_outline</Icon>
+                                                            </ListItemIcon>
+                                                            <ListItemText primary="Define menu" />
+                                                        </StyledMenuItem>
+                                                        : null}
+                                                </StyledMenu>
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -286,10 +370,11 @@ function mapDispatchToProps(dispatch) {
     }, dispatch);
 }
 
-function mapStateToProps({ category, SharedReducers }) {
+function mapStateToProps({ category, SharedReducers, auth }) {
     return {
         Items: category.prices.data,
-        searchText: SharedReducers.searchText.searchText
+        searchText: SharedReducers.searchText.searchText,
+        user: auth.user
     }
 }
 

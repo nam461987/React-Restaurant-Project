@@ -11,7 +11,7 @@ class ComponentHeader extends Component {
         this.props.clearSearchText();
     }
     render() {
-        const { setSearchText, searchText, mainTheme, obj, user, headersearch } = this.props;
+        const { setSearchText, searchText, mainTheme, obj, user, headersearch, addnew } = this.props;
         return (
             <div className="flex flex-1 w-full items-center justify-between">
 
@@ -49,13 +49,13 @@ class ComponentHeader extends Component {
 
                     </div>
                 }
-                {user.permissions.includes(obj.addNewPermission) ?
+                {user.permissions.includes(obj.addNewPermission) && addnew != null && !addnew ? null :
                     <FuseAnimate animation="transition.slideRightIn" delay={300}>
                         <Button component={Link} to={obj.baseRoute + "new"} className="whitespace-no-wrap" variant="contained">
                             <span className="hidden sm:flex">Add New {obj.appName}</span>
                             <span className="flex sm:hidden">New</span>
                         </Button>
-                    </FuseAnimate> : null}
+                    </FuseAnimate>}
 
             </div>
         );

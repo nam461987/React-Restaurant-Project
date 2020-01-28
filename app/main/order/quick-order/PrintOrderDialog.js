@@ -69,7 +69,6 @@ class PrintOrderDialog extends Component {
 
     Content = () => {
         const { order, orders, classes } = this.props;
-        console.log(this.props);
         return (
             <div className={classNames(classes.root, "flex-grow flex-no-shrink p-0")}>
 
@@ -164,7 +163,6 @@ class PrintOrderDialog extends Component {
     }
 
     render() {
-        console.log(this.state);
         return (
             <div>
                 <Dialog

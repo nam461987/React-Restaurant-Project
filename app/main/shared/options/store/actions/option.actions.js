@@ -44,8 +44,7 @@ export function getOptionsByDependId(fieldName, optionUrl, id) {
                 type: GET_ITEM_OPTIONS,
                 payload: options
             })
-        }
-        );
+        });
 }
 export function ClearOptionsInLogin() {
     let options = {};

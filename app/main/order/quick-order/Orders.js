@@ -77,7 +77,6 @@ class SimpleFullWidthSample extends Component {
         await this.props.addOrder(this.props.order);
         const { order, orders } = this.props;
         if (order.Id && order.Id > 0) {
-            console.log('run success');
             for (let i = 0; i < orders.length; i++) {
                 orders[i].PlacedOrderId = order.Id;
                 await this.props.addOrderDetail(orders[i]);
@@ -88,11 +87,29 @@ class SimpleFullWidthSample extends Component {
             });
         }
         else {
-            console.log('run fail');
             this.props.showMessage({ message: Constants.MODAL.ADD_DATA_FAIL, variant: Constants.VARIANT.ERROR });
         }
         this.bothSideUpdated();
     }
+
+    checkoutClick = async (item, route) => {
+        this.setState({
+            cloneOrder: Object.assign({}, this.props.order)
+        })
+        await this.props.addOrder(this.props.order);
+        const { order, orders } = this.props;
+        if (order.Id && order.Id > 0) {
+            for (let i = 0; i < orders.length; i++) {
+                orders[i].PlacedOrderId = order.Id;
+                await this.props.addOrderDetail(orders[i]);
+            }
+            this.props.history.push('/payment/order/' + order.Id);
+        }
+        else {
+            this.props.showMessage({ message: Constants.MODAL.ADD_DATA_FAIL, variant: Constants.VARIANT.ERROR });
+        }
+        this.bothSideUpdated();
+    };
 
     handlePrintOrder = () => {
         this.props.setDefaultOrderValue();
@@ -172,11 +189,23 @@ class SimpleFullWidthSample extends Component {
                                     size="medium"
                                     color="secondary"
                                     aria-label="Add"
+                                    className="mr-8"
                                     disabled={!this.canBeSent()}
                                     onClick={event => this.handleSendOrder()}
                                 >
                                     <NavigationIcon className={classes.extendedIcon} />
                                     Send Order
+                            </Fab>
+                                <Fab
+                                    variant="extended"
+                                    size="medium"
+                                    aria-label="Add"
+                                    className="bg-green text-white"
+                                    disabled={!this.canBeSent()}
+                                    onClick={event => this.checkoutClick()}
+                                >
+                                    <Icon className={classes.extendedIcon}>payment</Icon>
+                                    Checkout
                             </Fab>
                             </div>
                         </div>

@@ -94,7 +94,7 @@ class Filter {
     static svcActive = function (text) {
         var ac = <Icon className='text-green text-20'>check_circle</Icon>;
         var iac = <Icon className='text-red text-20'>remove_circle</Icon>;
-        var v = parseInt(text);
+        var v = parseInt(text == null ? 0 : text);
         if (v == 1) {
             return ac;
         }

@@ -213,9 +213,7 @@ const OrderInvoice = ({ classes, order, orderDetails, branch }) => {
                                     </TableRow>
                                 </TableBody>
                             </Table>
-
                         </div>
-
                     </CardContent>
                 </Card>
             )}

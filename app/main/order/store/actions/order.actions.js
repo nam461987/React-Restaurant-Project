@@ -22,6 +22,7 @@ export function addOrder(data) {
             else {
                 dispatch(newOrder())
             }
+        }).catch(error => {
         });
 }
 export function acceptPreOrder(obj) {

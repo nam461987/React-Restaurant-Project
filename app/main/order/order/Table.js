@@ -66,7 +66,7 @@ class ComponentTable extends Component {
         selected: [],
         data: this.props.Items,
         page: 0,
-        rowsPerPage: 10,
+        rowsPerPage: 50,
         anchorEl: []
     };
 
@@ -211,7 +211,7 @@ class ComponentTable extends Component {
                         />
 
                         <TableBody>
-                            {_.orderBy(data.Items, [
+                            {_.orderBy(!data ? null : data.Items, [
                                 (o) => {
                                     switch (orderBy) {
                                         case 'categories':
@@ -238,7 +238,8 @@ class ComponentTable extends Component {
                                             tabIndex={-1}
                                             key={n.Id}
                                             selected={isSelected}
-                                            onClick={event => this.handleClick(n, obj.baseRoute)}
+                                            onClick={event => n.IsFinish == 1 ? this.handleViewSummaryClick(n)
+                                                : this.handleClick(n, obj.baseRoute)}
                                         >
                                             <TableCell className="w-48 pl-4 sm:pl-12" padding="checkbox">
                                                 <Checkbox
@@ -278,6 +279,13 @@ class ComponentTable extends Component {
                                                                                     <div className={`inline text-12 p-4 rounded truncate ${n.OrderProcessIdColor}`}>
                                                                                         {n[c]}
                                                                                     </div>
+                                                                                </TableCell>
+                                                                            );
+                                                                        }
+                                                                        else if (f.field == 'CustomerId') {
+                                                                            return (
+                                                                                <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
+                                                                                    {n[c] ? n[c] : n.CustomerName}
                                                                                 </TableCell>
                                                                             );
                                                                         }
@@ -322,6 +330,13 @@ class ComponentTable extends Component {
                                                                     }
                                                                 default:
                                                                     {
+                                                                        if (f.field == 'Code') {
+                                                                            return (
+                                                                                <TableCell key={index} component="th" scope="row" align={f.align}>
+                                                                                    {n[c].substring(n[c].length - 4)}
+                                                                                </TableCell>
+                                                                            )
+                                                                        }
                                                                         return (
                                                                             <TableCell key={index} component="th" scope="row" align={f.align}>
                                                                                 {n[c]}
@@ -357,7 +372,7 @@ class ComponentTable extends Component {
                                                     open={Boolean(this.state.anchorEl[n.Id])}
                                                     onClose={event => this.handleDropdownButtonClose()}
                                                 >
-                                                    {user.permissions.includes('placed_order_detail_create') ?
+                                                    {user.permissions.includes('placed_order_detail_create') && !n.IsFinish ?
                                                         <StyledMenuItem onClick={event => this.handleAddMoreOrderClick(n)}>
                                                             <ListItemIcon>
                                                                 <Icon>add_circle_outline</Icon>
@@ -371,7 +386,7 @@ class ComponentTable extends Component {
                                                         </ListItemIcon>
                                                         <ListItemText primary="View Summary" />
                                                     </StyledMenuItem>
-                                                    {n.OrderProcessId && n.OrderProcessId != 9 &&
+                                                    {n.OrderProcessId && n.OrderProcessId != 9 && !n.IsFinish &&
                                                         <StyledMenuItem onClick={event => this.handleCancelOrderClick(n)}>
                                                             <ListItemIcon>
                                                                 <Icon>clear</Icon>

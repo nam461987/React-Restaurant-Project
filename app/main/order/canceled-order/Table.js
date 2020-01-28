@@ -21,9 +21,42 @@ import { bindActionCreators } from 'redux';
 import connect from 'react-redux/es/connect/connect';
 import _ from '@lodash';
 import slugify from 'slugify';
-import ComponentTableHead from './TableHead';
+import ComponentTableHead from 'app/main/shared/components/TableHead';
 import * as Actions from '../store/actions';
 import Filter from 'app/main/shared/functions/filters';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+
+
+const StyledMenu = withStyles({
+    paper: {
+        border: '1px solid #d3d4d5',
+    },
+})(props => (
+    <Menu
+        elevation={0}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+        }}
+        transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+        }}
+        {...props}
+    />
+));
+
+const StyledMenuItem = withStyles(theme => ({
+    root: {
+        // '&:focus': {
+        //     backgroundColor: theme.palette.primary.main,
+        //     '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
+        //         color: theme.palette.common.white,
+        //     },
+        // },
+    }
+}))(MenuItem);
 
 class ComponentTable extends Component {
 
@@ -31,19 +64,32 @@ class ComponentTable extends Component {
         order: 'asc',
         orderBy: null,
         selected: [],
-        data: this.props.Items
+        data: this.props.Items,
+        page: 0,
+        rowsPerPage: 50,
+        anchorEl: []
     };
 
     componentDidMount() {
-        this.props.getOrderDetailByOrderId(this.props.match.params);
+        this.props.getCanceledPlacedOrders(this.state.page, this.state.rowsPerPage);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (!_.isEqual(this.props.Items, prevProps.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
+        if (!_.isEqual(this.props.Items.Items, prevProps.Items.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
             || !_.isEqual(this.props.page, prevProps.page)) {
             const data = this.getFilteredArray(this.props.Items, this.props.searchText);
             this.setState({ data })
         }
+        if (this.state.data == null) {
+            this.props.getCanceledPlacedOrders(this.state.page, this.state.rowsPerPage);
+        }
+    }
+
+    handleDropdownButtonClick = (event, id) => {
+        this.setState({ anchorEl: _.set({ ...this.state.anchorEl }, id, event.currentTarget) });
+    }
+    handleDropdownButtonClose = () => {
+        this.setState({ anchorEl: [] })
     }
 
     getFilteredArray = (data, searchText) => {
@@ -52,7 +98,7 @@ class ComponentTable extends Component {
         if (searchText.length === 0) {
             return newData;
         }
-        newData = _.filter(newData, item => {
+        newData.Items = _.filter(newData.Items, item => {
             for (var i = 0; i < listObj.length; i++) {
                 if (item[listObj[i].field] != null &&
                     item[listObj[i].field].toString().toLowerCase().includes(searchText.toString().toLowerCase())) {
@@ -81,18 +127,10 @@ class ComponentTable extends Component {
     }
     handleSelectAllClick = event => {
         if (event.target.checked) {
-            this.setState(state => ({
-                selected: Object.keys(this.state.data).map((n, index) => ({
-                    id: n.Id, status: n.Status, parentId: n.PlacedOrderId
-                }))
-            }));
+            this.setState(state => ({ selected: this.state.data.Items.map(n => ({ id: n.Id, status: n.Status })) }));
             return;
         }
         this.setState({ selected: [] });
-    };
-
-    handleClick = (item, route) => {
-        this.props.history.push(route + item.Id + '/' + slugify(item[this.props.obj.urlName], { replacement: '-', remove: null, lower: true }));
     };
 
     handleCheck = (event, obj) => {
@@ -118,8 +156,34 @@ class ComponentTable extends Component {
         this.setState({ selected: newSelected });
     };
 
+    handleChangePage = (event, page) => {
+        this.props.getCanceledPlacedOrders(page, this.state.rowsPerPage);
+        this.setState({ page, selected: [] });
+    };
+
+    handleChangeRowsPerPage = event => {
+        this.props.getCanceledPlacedOrders(0, event.target.value);
+        this.setState({ rowsPerPage: event.target.value, selected: [] });
+    };
+
     isSelected = obj => this.state.selected.findIndex(x => x.id === obj.id) !== -1;
 
+    handleAddMoreOrderClick = (item) => {
+        this.props.history.push('/order/add-more-orders/' + item.Id + '/' + slugify(item.Code, { replacement: '-', remove: null, lower: true }));
+    };
+    handleViewSummaryClick = (item) => {
+        this.props.history.push('/placed-orders/summary/' + item.Id);
+    }
+    handleCancelOrderClick = async (item) => {
+        let result = window.confirm("Are you sure cancel this order?");
+        if (result) {
+            await this.props.cancelPlacedOrder(item.Id);
+            this.props.getCanceledPlacedOrders(this.state.page, this.state.rowsPerPage);
+        }
+    }
+    handleOrderDetailsClick = (item) => {
+        this.props.history.push('/placed-orders/details/' + item.Id);
+    }
     render() {
         const { obj, setStatus, user } = this.props;
         const { order, orderBy, selected, rowsPerPage, page, data } = this.state;
@@ -145,7 +209,7 @@ class ComponentTable extends Component {
                         />
 
                         <TableBody>
-                            {_.orderBy(data, [
+                            {_.orderBy(!data ? null : data.Items, [
                                 (o) => {
                                     switch (orderBy) {
                                         case 'categories':
@@ -161,7 +225,7 @@ class ComponentTable extends Component {
                             ], [order])
                                 // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map(n => {
-                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status, parentId: n.PlacedOrderId });
+                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status });
 
                                     return (
                                         <TableRow
@@ -172,14 +236,12 @@ class ComponentTable extends Component {
                                             tabIndex={-1}
                                             key={n.Id}
                                             selected={isSelected}
-                                            // onClick={event => this.handleClick(n, obj.baseRoute)}
                                         >
                                             <TableCell className="w-48 pl-4 sm:pl-12" padding="checkbox">
                                                 <Checkbox
                                                     checked={isSelected}
                                                     onClick={event => event.stopPropagation()}
-                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status, parentId: n.PlacedOrderId })}
-                                                    disabled={n.IsFinish ? true : false}
+                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status })}
                                                 />
                                             </TableCell>
 
@@ -213,6 +275,13 @@ class ComponentTable extends Component {
                                                                                     <div className={`inline text-12 p-4 rounded truncate ${n.OrderProcessIdColor}`}>
                                                                                         {n[c]}
                                                                                     </div>
+                                                                                </TableCell>
+                                                                            );
+                                                                        }
+                                                                        else if (f.field == 'CustomerId') {
+                                                                            return (
+                                                                                <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
+                                                                                    {n[c] ? n[c] : n.CustomerName}
                                                                                 </TableCell>
                                                                             );
                                                                         }
@@ -257,6 +326,13 @@ class ComponentTable extends Component {
                                                                     }
                                                                 default:
                                                                     {
+                                                                        if (f.field == 'Code') {
+                                                                            return (
+                                                                                <TableCell key={index} component="th" scope="row" align={f.align}>
+                                                                                    {n[c].substring(n[c].length - 4)}
+                                                                                </TableCell>
+                                                                            )
+                                                                        }
                                                                         return (
                                                                             <TableCell key={index} component="th" scope="row" align={f.align}>
                                                                                 {n[c]}
@@ -268,6 +344,46 @@ class ComponentTable extends Component {
                                                     })
                                                 )
                                             })}
+                                            {/* {user.permissions.includes('placed_order_detail_create') ?
+                                                <TableCell component="th" scope="row" align="center"
+                                                    onClick={event => event.stopPropagation()}>
+                                                    <Icon onClick={event => this.handleAddMoreOrderClick(n)} className="text-20">add_circle_outline</Icon>
+                                                </TableCell>
+                                                :
+                                                <TableCell component="th" scope="row" align="center"></TableCell>
+                                            } */}
+                                            <TableCell component="th" scope="row" align="center"
+                                                onClick={event => event.stopPropagation()}>
+                                                <IconButton
+                                                    aria-label="more"
+                                                    aria-controls="long-menu"
+                                                    aria-haspopup="true"
+                                                    onClick={event => this.handleDropdownButtonClick(event, n.Id)}
+                                                >
+                                                    <MoreVertIcon />
+                                                </IconButton>
+                                                <StyledMenu
+                                                    anchorEl={this.state.anchorEl[n.Id]}
+                                                    keepMounted
+                                                    open={Boolean(this.state.anchorEl[n.Id])}
+                                                    onClose={event => this.handleDropdownButtonClose()}
+                                                >
+                                                    <StyledMenuItem onClick={event => this.handleViewSummaryClick(n)}>
+                                                        <ListItemIcon>
+                                                            <Icon>visibility</Icon>
+                                                        </ListItemIcon>
+                                                        <ListItemText primary="View Summary" />
+                                                    </StyledMenuItem>
+                                                    {user.permissions.includes('placed_order_detail_list') ?
+                                                        <StyledMenuItem onClick={event => this.handleOrderDetailsClick(n)}>
+                                                            <ListItemIcon>
+                                                                <Icon>add_circle_outline</Icon>
+                                                            </ListItemIcon>
+                                                            <ListItemText primary="Order Details" />
+                                                        </StyledMenuItem>
+                                                        : null}
+                                                </StyledMenu>
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -275,7 +391,20 @@ class ComponentTable extends Component {
                     </Table>
                 </FuseScrollbars>
 
-
+                <TablePagination
+                    component="div"
+                    count={data.TotalItems != null ? data.TotalItems : 0}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    backIconButtonProps={{
+                        'aria-label': 'Previous Page'
+                    }}
+                    nextIconButtonProps={{
+                        'aria-label': 'Next Page'
+                    }}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
             </div>
         );
     }
@@ -283,14 +412,15 @@ class ComponentTable extends Component {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        setStatus: Actions.setPlacedOrderDetailstatus,
-        getOrderDetailByOrderId: Actions.getOrderDetailByOrderId
+        getCanceledPlacedOrders: Actions.getCanceledPlacedOrders,
+        setStatus: Actions.setPlacedOrderstatus,
+        cancelPlacedOrder: Actions.cancelPlacedOrder
     }, dispatch);
 }
 
 function mapStateToProps({ order, SharedReducers, auth }) {
     return {
-        Items: order.summary.orderDetails,
+        Items: order.placedOrders.data,
         searchText: SharedReducers.searchText.searchText,
         user: auth.user
     }

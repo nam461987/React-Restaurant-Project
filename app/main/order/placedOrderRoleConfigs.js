@@ -21,6 +21,13 @@ export const placedOrderRoleConfigs = {
             })
         },
         {
+            path: '/order/canceled-placed-orders',
+            authByStr: "placed_order_list",
+            component: FuseLoadable({
+                loader: () => import('./canceled-order/PlacedOrders')
+            })
+        },
+        {
             path: '/placed-orders/summary/:id',
             authByStr: "placed_order_list",
             component: FuseLoadable({

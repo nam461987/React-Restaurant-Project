@@ -288,6 +288,7 @@ class Modal extends Component {
                                     variant={OrderTypeId && OrderTypeId == 1 ? "contained" : "outlined"}
                                     color={OrderTypeId && OrderTypeId == 1 ? "secondary" : "default"}
                                     style={{ padding: 50 }}
+                                    fullWidth
                                     onClick={event => this.handleOrderTypeClick(1, 'Dine In')}>
                                     Dine In
                                 </Button>
@@ -431,7 +432,7 @@ class Modal extends Component {
                                         className={this.props.classes.button}
                                         onClick={() => this.handleTableClick(c.Id, c.Name)}>
                                         {c.Name} <br />
-                                        {c.Capacity} people
+                                        ( {c.Capacity} people )
                                     </Button>)) : <Typography variant="h5" gutterBottom>No data</Typography>
                                     : ""
                                 }

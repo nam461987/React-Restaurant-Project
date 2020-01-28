@@ -45,7 +45,6 @@ class Summary extends Component {
         const { processStatus, orderDetails, branch } = this.props;
         const placedOrder = this.props.placedOrder.data;
         const { tabValue } = this.state;
-        console.log(this.props.match.params);
 
         return (
             <FusePageCarded
@@ -183,22 +182,22 @@ class Summary extends Component {
                                                             )}
                                                             {!placedOrder.CustomerId && !placedOrder.CustomerName && (
                                                                 <tr>
-                                                                    <td >
+                                                                    <td>
                                                                         <div className="flex items-center">
                                                                             <Avatar className="mr-8" src="assets/images/avatars/profile.jpg" alt={placedOrder.CustomerIdName} />
                                                                             <Typography className="truncate">
-                                                                                {placedOrder.CustomerName}
+                                                                                {placedOrder.CustomerId ? placedOrder.CustomerIdName : placedOrder.CustomerName}
                                                                             </Typography>
                                                                         </div>
                                                                     </td>
                                                                     <td>
-                                                                        <Typography className="truncate">-empty-</Typography>
+                                                                        <Typography className="truncate">{placedOrder.CustomerId ? placedOrder.CustomerIdEmail : ''}</Typography>
                                                                     </td>
                                                                     <td>
-                                                                        <Typography className="truncate">{placedOrder.CustomerPhone}</Typography>
+                                                                        <Typography className="truncate">{placedOrder.CustomerId ? placedOrder.CustomerIdPhone : placedOrder.CustomerPhone}</Typography>
                                                                     </td>
                                                                     <td>
-                                                                        <span className="truncate">{placedOrder.CustomerIdAddress}</span>
+                                                                        <span className="truncate">{placedOrder.CustomerId ? placedOrder.CustomerIdAddress : placedOrder.CustomerIdAddress}</span>
                                                                     </td>
                                                                 </tr>
                                                             )}
@@ -385,6 +384,7 @@ class Summary extends Component {
                                                     <th>Name</th>
                                                     <th>Quantity</th>
                                                     <th>Price</th>
+                                                    <th>IsFinish</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -406,17 +406,21 @@ class Summary extends Component {
                                                                 {c.MenuIdName} ({c.SizeIdName})
                                                             </Typography>
                                                         </td>
-                                                        <td className="w-64 text-right">
+                                                        <td>
                                                             <span className="truncate">
                                                                 {c.Quantity}
                                                             </span>
                                                         </td>
-                                                        <td className="w-64 text-right">
+                                                        <td>
                                                             <span className="truncate">
                                                                 {Filter.svcMoney(c.MenuPrice)}
                                                             </span>
                                                         </td>
-
+                                                        <td>
+                                                            <span className="truncate">
+                                                                {Filter.svcActive(c.IsFinish)}
+                                                            </span>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -448,7 +452,6 @@ function mapDispatchToProps(dispatch) {
 }
 
 function mapStateToProps({ order }) {
-    console.log(order);
     return {
         processStatus: order.summary.processStatus,
         orderDetails: order.summary.orderDetails,

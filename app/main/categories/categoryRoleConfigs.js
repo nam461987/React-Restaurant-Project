@@ -140,6 +140,32 @@ export const categoryRoleConfigs = {
             component: FuseLoadable({
                 loader: () => import('./order-process/Processes')
             })
+        },
+        {
+            path     : '/categories/menu-defines/:menuid/:sizeid/:id/:handle?',
+            component: FuseLoadable({
+                loader: () => import('./menu-define/Define')
+            })
+        },
+        {
+            path     : '/categories/menu-defines/:menuid/:sizeid',
+            authByStr: "menu_definition_list",
+            component: FuseLoadable({
+                loader: () => import('./menu-define/Defines')
+            })
+        },
+        {
+            path     : '/categories/taxes/:id/:handle?',
+            component: FuseLoadable({
+                loader: () => import('./tax/Tax')
+            })
+        },
+        {
+            path     : '/categories/taxes',
+            authByStr: "category_tax_list",
+            component: FuseLoadable({
+                loader: () => import('./tax/Taxes')
+            })
         }
     ]
 };

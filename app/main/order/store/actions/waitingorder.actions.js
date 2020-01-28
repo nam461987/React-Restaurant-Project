@@ -34,7 +34,7 @@ export function getWaitingOrdersDetail() {
         });
 }
 export function setFinishOrderDetail(id, isFinish) {
-    const request = AxiosConfig.get(Constants.API_PLACED_ORDER_DETAIL.setfinishorderdetail, {
+    const request = AxiosConfig.put(Constants.API_PLACED_ORDER_DETAIL.setfinishorderdetail, {}, {
         params: {
             Id: id,
             IsFinish: isFinish
@@ -54,7 +54,7 @@ export function setFinishOrderDetail(id, isFinish) {
             else {
                 dispatch(showMessage({ message: Constants.MODAL.SAVE_DATA_FAIL, variant: Constants.VARIANT.ERROR }));
             }
-             
+
         });
 }
 export function setCompleteOrder(obj) {
@@ -71,17 +71,15 @@ export function setCompleteOrder(obj) {
             return response.data;
         });
 }
-export function setOrdersSearchText(event)
-{
+export function setOrdersSearchText(event) {
     return {
-        type      : SET_ORDERS_SEARCH_TEXT,
+        type: SET_ORDERS_SEARCH_TEXT,
         searchText: event.target.value
     }
 }
-export function setCategoryFilter(event)
-{
+export function setCategoryFilter(event) {
     return {
-        type    : SET_ORDERS_CATEGORY_FILTER,
+        type: SET_ORDERS_CATEGORY_FILTER,
         category: event.target.value
     }
 }

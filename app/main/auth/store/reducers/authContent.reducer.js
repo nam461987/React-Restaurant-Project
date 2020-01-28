@@ -2,7 +2,7 @@ import * as Actions from '../actions';
 
 const initialState = {
     data: {
-        title:"Welcome to VANGIE HOUSE",
+        title:"Welcome to Cloud Restaurant System",
         description:"Enjoy with our services we bring to you"
     }
 };

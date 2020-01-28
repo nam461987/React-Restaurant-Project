@@ -98,6 +98,14 @@ const navigationConfig = [
                         'authByStr': 'order_process_list',
                         'url': '/categories/order-processes'
                     }
+                    ,
+                    {
+                        'id': 'tax-component',
+                        'title': 'Tax',
+                        'type': 'item',
+                        'authByStr': 'category_tax_list',
+                        'url': '/categories/taxes'
+                    }
                 ]
             }
         ]
@@ -128,6 +136,13 @@ const navigationConfig = [
                         'type': 'item',
                         'authByStr': 'placed_order_list',
                         'url': '/order/placed-orders'
+                    },
+                    {
+                        'id': 'canceled-placed-order-component',
+                        'title': 'Canceled Order List',
+                        'type': 'item',
+                        'authByStr': 'placed_order_list',
+                        'url': '/order/canceled-placed-orders'
                     },
                     {
                         'id': 'waiting-order-component',

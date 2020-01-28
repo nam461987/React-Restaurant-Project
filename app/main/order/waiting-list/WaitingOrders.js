@@ -115,7 +115,7 @@ class WaitingOrders extends Component {
                             <FormControl className="w-full" component="fieldset">
                                 <FormGroup>
                                     <FormControlLabel
-                                        control={<Checkbox checked={item.IsFinish == 1}
+                                        control={<Checkbox checked={item.IsFinish == 1} disabled={item.IsFinish == 1}
                                             onChange={event => this.handleCheck(event, { id: item.Id, check: item.IsFinish })} value={`${item.IsFinish}`} />}
                                         label={content}
                                     />
@@ -163,6 +163,17 @@ class WaitingOrders extends Component {
         let result = window.confirm("Are you sure this order is completed ?");
         if (result) {
             const success = await this.props.setCompleteOrder(obj);
+            if (success) {
+                const data = this.state.waitingOrders.filter(function (el) { return el.Id != obj.Id; });
+                this.setState({ waitingOrders: data });
+            }
+        }
+    }
+
+    CancelOrder = async (obj) => {
+        let result = window.confirm("Are you sure to cancel this order ?");
+        if (result) {
+            const success = await this.props.cancelPlacedOrder(obj.Id);
             if (success) {
                 const data = this.state.waitingOrders.filter(function (el) { return el.Id != obj.Id; });
                 this.setState({ waitingOrders: data });
@@ -246,6 +257,7 @@ class WaitingOrders extends Component {
                                     <Card elevation={1} className="flex flex-col">
                                         <div
                                             className={`${item.OrderProcessIdColor} flex flex-no-shrink items-center justify-between px-24 h-64`}
+                                            onDoubleClick ={event => this.CancelOrder(item)}
                                         >
                                             <Typography className="font-medium truncate" color="inherit">{item.OrderProcessIdName}</Typography>
                                             <div className="flex items-center justify-center opacity-75">
@@ -254,7 +266,7 @@ class WaitingOrders extends Component {
                                             </div>
                                         </div>
                                         <CardContent className="flex flex-col flex-auto items-center justify-center">
-                                            <Typography className="text-center text-16 font-bold">Order {item.Code.substring(item.Code.length - 4)}</Typography>
+                                            <Typography className="text-center text-16 font-bold">Order #{item.Code.substring(item.Code.length - 4)}</Typography>
                                             {this.getOrderDetailByOrder(item.Id)}
                                         </CardContent>
                                         <Divider />
@@ -293,7 +305,8 @@ function mapDispatchToProps(dispatch) {
         setFinishOrderDetail: Actions.setFinishOrderDetail,
         setCompleteOrder: Actions.setCompleteOrder,
         setCategoryFilter: Actions.setCategoryFilter,
-        setSearchText: Actions.setOrdersSearchText
+        setSearchText: Actions.setOrdersSearchText,
+        cancelPlacedOrder: Actions.cancelPlacedOrder
     }, dispatch);
 }
 

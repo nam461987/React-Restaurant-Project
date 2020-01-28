@@ -21,6 +21,10 @@ import tables from './tables.reducer';
 import table from './table.reducer';
 import processes from './processes.reducer';
 import process from './process.reducer';
+import defines from './defines.reducer';
+import define from './define.reducer';
+import taxes from './taxes.reducer';
+import tax from './tax.reducer';
 
 const reducer = combineReducers({
     restaurants,
@@ -44,7 +48,11 @@ const reducer = combineReducers({
     tables,
     table,
     processes,
-    process
+    process,
+    defines,
+    define,
+    taxes,
+    tax
 });
 
 export default reducer;

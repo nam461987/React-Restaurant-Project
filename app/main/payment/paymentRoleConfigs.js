@@ -26,6 +26,7 @@ export const paymentRoleConfigs = {
     routes  : [
         {
             path     : '/payment/order/:id',
+            authByStr: "checkout_page",
             component: FuseLoadable({
                 loader: () => import('./checkout/Checkout')
             })

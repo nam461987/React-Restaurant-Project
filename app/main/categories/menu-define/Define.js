@@ -69,7 +69,7 @@ const styles = theme => ({
     }
 });
 
-class PlacedOrderDetail extends Component {
+class Define extends Component {
 
     state = {
         form: null,
@@ -86,37 +86,37 @@ class PlacedOrderDetail extends Component {
                 }
             }
         }
-        this.updatePlacedOrderDetailState();
+        this.updateDefineState();
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (!_.isEqual(this.props.location, prevProps.location)) {
-            this.updatePlacedOrderDetailState();
+            this.updateDefineState();
         }
 
         if (
-            (this.props.placedOrderDetail.data && !this.state.form) ||
-            (this.props.placedOrderDetail.data && this.state.form && this.props.placedOrderDetail.data.Id !== this.state.form.Id)
+            (this.props.define.data && !this.state.form) ||
+            (this.props.define.data && this.state.form && this.props.define.data.Id !== this.state.form.Id)
         ) {
             this.updateFormState();
         }
     };
 
     updateFormState = () => {
-        const { placedOrderDetail } = this.props;
+        const { define } = this.props;
         // auto get depend option list in update item mode
         for (var i = 0; i < obj.fields.length; i++) {
             if (obj.fields[i].depend) {
                 if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
                     && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
-                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, placedOrderDetail.data[obj.fields[i].depend]);
+                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, define.data[obj.fields[i].depend]);
                 }
             }
         }
-        this.setState({ form: this.props.placedOrderDetail.data })
+        this.setState({ form: this.props.define.data })
     };
 
-    updatePlacedOrderDetailState = () => {
+    updateDefineState = () => {
         const { history, user } = this.props;
         const params = this.props.match.params;
         const { id } = params;
@@ -126,8 +126,8 @@ class PlacedOrderDetail extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.placedOrderDetail.added = false;
-            this.props.newPlacedOrderDetail();
+            this.props.define.added = false;
+            this.props.newDefine();
             this.setState({ isNew: true })
         }
         else {
@@ -136,7 +136,7 @@ class PlacedOrderDetail extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.getPlacedOrderDetail(id);
+            this.props.getDefine(id);
         }
     };
 
@@ -155,11 +155,11 @@ class PlacedOrderDetail extends Component {
 
     canBeSubmitted() {
         if (this.state.isNew) {
-            return this.checkRequiredFields() && !this.props.placedOrderDetail.added &&
-                !_.isEqual(this.props.placedOrderDetail.data, this.state.form)
+            return this.checkRequiredFields() && !this.props.define.added &&
+                !_.isEqual(this.props.define.data, this.state.form)
         }
         return (this.checkRequiredFields() &&
-            !_.isEqual(this.props.placedOrderDetail.data, this.state.form)) || this.state.file != null
+            !_.isEqual(this.props.define.data, this.state.form)) || this.state.file != null
     };
     checkRequiredFields = () => {
         let result = false;
@@ -214,16 +214,23 @@ class PlacedOrderDetail extends Component {
         this.setState({ file: null })
     }
     submit = async () => {
-        const { savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
+        const { saveDefine, addDefine } = this.props;
         const { form } = this.state;
+        const params = this.props.match.params;
+        const { menuid, sizeid } = params;
         if (this.state.file != null) {
             await this.uploadImage();
         }
-        this.state.isNew ? addPlacedOrderDetail(form) : savePlacedOrderDetail(form);
+
+        // Set MenuId and SizeId to form before submit
+        form.MenuId = menuid;
+        form.SizeId = sizeid;
+
+        this.state.isNew ? addDefine(form) : saveDefine(form);
     }
 
     render() {
-        const { classes, savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
+        const { classes, saveDefine, addDefine } = this.props;
         const { form } = this.state;
         return (
             <FusePageCarded
@@ -430,25 +437,44 @@ class PlacedOrderDetail extends Component {
                                                     this.props.options.options['options_' + f.field + '_array'] ? this.props.options.options['options_' + f.field + '_array'].map(o => ({ value: o.Value, label: o.DisplayText })) : []
                                                     : this.props.options.options['options_' + f.field + '_' + f.option] ? this.props.options.options['options_' + f.field + '_' + f.option].map(o => ({ value: o.Value, label: o.DisplayText })) : []
                                                 return (
-                                                    <FuseChipSelect
-                                                        key={f.field}
-                                                        id={f.field}
-                                                        name={f.field}
-                                                        className="w-full my-16"
-                                                        value={form[f.field] ? options.filter(o => o.value == form[f.field]) : { value: '', label: 'Select ' + f.label }}
-                                                        onChange={(value) => this.handleChipChange(value, f.field)}
-                                                        placeholder={"Select " + f.label}
-                                                        textFieldProps={{
-                                                            label: f.label,
-                                                            InputLabelProps: {
-                                                                shrink: true
-                                                            },
-                                                            variant: 'outlined'
-                                                        }}
-                                                        required={f.required ? true : false}
-                                                        options={options}
-                                                        fullWidth
-                                                    />
+                                                    !this.state.isNew && f.convertToInputInEdit ?
+                                                        <TextField
+                                                            key={f.field}
+                                                            className="mt-8 mb-16"
+                                                            error={f.required ? form[f.field] === '' : false}
+                                                            required={f.required ? true : false}
+                                                            label={f.label}
+                                                            autoFocus={f.autoFocus ? f.autoFocus : false}
+                                                            placeholder={f.placeHolder ? f.placeHolder : ""}
+                                                            id={f.field}
+                                                            name={f.field}
+                                                            value={form[f.field + f.view]}
+                                                            onChange={this.handleChange}
+                                                            variant="outlined"
+                                                            InputProps={{
+                                                                readOnly: this.state.isNew ? false : f.readOnly
+                                                            }}
+                                                            fullWidth
+                                                        />
+                                                        : <FuseChipSelect
+                                                            key={f.field}
+                                                            id={f.field}
+                                                            name={f.field}
+                                                            className="w-full my-16"
+                                                            value={form[f.field] ? options.filter(o => o.value == form[f.field]) : { value: '', label: 'Select ' + f.label }}
+                                                            onChange={(value) => this.handleChipChange(value, f.field)}
+                                                            placeholder={"Select " + f.label}
+                                                            textFieldProps={{
+                                                                label: f.label,
+                                                                InputLabelProps: {
+                                                                    shrink: true
+                                                                },
+                                                                variant: 'outlined'
+                                                            }}
+                                                            required={f.required ? true : false}
+                                                            options={options}
+                                                            fullWidth
+                                                        />
                                                 )
                                             }
                                         case "checkbox":
@@ -463,30 +489,6 @@ class PlacedOrderDetail extends Component {
                                                             />
                                                         </FormGroup>
                                                     </FormControl>
-                                                )
-                                            }
-                                        case "number":
-                                        case "money":
-                                            {
-                                                return (
-                                                    <TextField
-                                                        key={f.field}
-                                                        type="number"
-                                                        className="mt-8 mb-16"
-                                                        error={f.required ? form[f.field] === 0 : false}
-                                                        required={f.required ? true : false}
-                                                        label={f.label}
-                                                        autoFocus={f.autoFocus ? f.autoFocus : false}
-                                                        id={f.field}
-                                                        name={f.field}
-                                                        value={form[f.field] || 0}
-                                                        onChange={this.handleChange}
-                                                        variant="outlined"
-                                                        InputProps={{
-                                                            readOnly: this.state.isNew ? false : f.readOnly
-                                                        }}
-                                                        fullWidth
-                                                    />
                                                 )
                                             }
                                         case "upload":
@@ -565,21 +567,21 @@ class PlacedOrderDetail extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         showMessage: showMessage,
-        getPlacedOrderDetail: Actions.getPlacedOrderDetail,
-        newPlacedOrderDetail: Actions.newPlacedOrderDetail,
-        addPlacedOrderDetail: Actions.addPlacedOrderDetail,
-        savePlacedOrderDetail: Actions.savePlacedOrderDetail,
+        getDefine: Actions.getDefine,
+        newDefine: Actions.newDefine,
+        addDefine: Actions.addDefine,
+        saveDefine: Actions.saveDefine,
         getOptionsByKey: SharedActions.getOptionsByKey,
         getOptionsByDependId: SharedActions.getOptionsByDependId
     }, dispatch);
 }
 
-function mapStateToProps({ order, options, auth }) {
+function mapStateToProps({ category, options, auth }) {
     return {
-        placedOrderDetail: order.placedOrderDetail,
+        define: category.define,
         options: options,
         user: auth.user
     }
 }
 
-export default withReducer('options', SharedReducer)(withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(PlacedOrderDetail)))));
+export default withReducer('options', SharedReducer)(withReducer('category', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Define)))));

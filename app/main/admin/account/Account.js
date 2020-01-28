@@ -366,7 +366,7 @@ class Account extends Component {
                                                     <TextField
                                                         key={f.field}
                                                         className="mt-8 mb-16"
-                                                        error={f.required && this.state.isNew ? form[f.field] == '' ? true : !this.checkPasswordLength() : false }
+                                                        error={f.required && this.state.isNew ? form[f.field] == '' ? true : !this.checkPasswordLength() : false}
                                                         required={f.required && this.state.isNew ? true : false}
                                                         label={f.label}
                                                         type="password"
@@ -486,6 +486,7 @@ class Account extends Component {
                                                 )
                                             }
                                         case "number":
+                                        case "money":
                                             {
                                                 return (
                                                     <TextField
@@ -496,7 +497,6 @@ class Account extends Component {
                                                         required={f.required ? true : false}
                                                         label={f.label}
                                                         autoFocus={f.autoFocus ? f.autoFocus : false}
-                                                        placeholder={f.placeHolder ? f.placeHolder : ""}
                                                         id={f.field}
                                                         name={f.field}
                                                         value={form[f.field] || ''}

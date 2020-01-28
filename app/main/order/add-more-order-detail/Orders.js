@@ -82,6 +82,11 @@ class AddMoreOrderDetail extends Component {
         this.bothSideUpdated();
     }
 
+    checkoutClick = (item, route) => {
+        // this.props.history.push(route + item.Id + '/' + slugify(item[this.props.obj.urlName], { replacement: '-', remove: null, lower: true }));
+        this.props.history.push('/payment/order/' + item.Id);
+    };
+
     canBeSent = () => {
         return this.props.orders.length > 0;
     }
@@ -96,8 +101,8 @@ class AddMoreOrderDetail extends Component {
                         root: classes.layoutRoot,
                         rightSidebar: "md:w-640 xl:w-640",
                         staticWidth: classes.sidebar,
-                        header: "h-100 min-h-100",
-                        sidebarHeader: "h-100 min-h-100"
+                        header: "h-100 min-h-100 flex flex-wrap content-center flex-row",
+                        sidebarHeader: "h-100 min-h-100 flex flex-wrap content-center flex-row"
                     }}
                     header={
                         <React.Fragment>
@@ -129,11 +134,21 @@ class AddMoreOrderDetail extends Component {
                                     size="medium"
                                     color="secondary"
                                     aria-label="Add"
+                                    className="mr-8"
                                     disabled={!this.canBeSent()}
                                     onClick={event => this.handleSendOrder()}
                                 >
                                     <NavigationIcon className={classes.extendedIcon} />
                                     Add Order
+                            </Fab>
+                            <Fab
+                                    variant="extended"
+                                    size="medium"
+                                    aria-label="Add"
+                                    className="bg-green text-white"
+                                >
+                                    <Icon className={classes.extendedIcon}>payment</Icon>
+                                    Checkout
                             </Fab>
                             </div>
                         </div>

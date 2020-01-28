@@ -9,8 +9,7 @@ import {
     FormLabel,
     FormGroup,
     FormControlLabel,
-    Checkbox,
-    IconButton
+    Checkbox
 } from '@material-ui/core';
 import { FuseAnimate, FusePageCarded, FuseChipSelect } from '@fuse';
 import { orange } from '@material-ui/core/colors';
@@ -25,8 +24,6 @@ import * as SharedActions from 'app/main/shared/options/store/actions';
 import SharedReducer from 'app/main/shared/options/store/reducers';
 import obj from './configs/config';
 import { showMessage } from 'app/store/actions/fuse';
-import PhotoCamera from '@material-ui/icons/PhotoCamera';
-import Upload from 'app/main/shared/functions/uploads';
 import Constants from 'app/shared/constants/constants';
 
 const styles = theme => ({
@@ -57,24 +54,14 @@ const styles = theme => ({
                 opacity: 1
             }
         }
-    },
-    button: {
-        margin: 8,
-    },
-    input: {
-        display: 'none',
-    },
-    textField: {
-        width: '80%'
     }
 });
 
-class PlacedOrderDetail extends Component {
+class Tax extends Component {
 
     state = {
         form: null,
-        isNew: false,
-        file: null
+        isNew: false
     };
 
     componentDidMount() {
@@ -86,37 +73,37 @@ class PlacedOrderDetail extends Component {
                 }
             }
         }
-        this.updatePlacedOrderDetailState();
+        this.updateTaxState();
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (!_.isEqual(this.props.location, prevProps.location)) {
-            this.updatePlacedOrderDetailState();
+            this.updateTaxState();
         }
 
         if (
-            (this.props.placedOrderDetail.data && !this.state.form) ||
-            (this.props.placedOrderDetail.data && this.state.form && this.props.placedOrderDetail.data.Id !== this.state.form.Id)
+            (this.props.tax.data && !this.state.form) ||
+            (this.props.tax.data && this.state.form && this.props.tax.data.Id !== this.state.form.Id)
         ) {
             this.updateFormState();
         }
     };
 
     updateFormState = () => {
-        const { placedOrderDetail } = this.props;
+        const { tax } = this.props;
         // auto get depend option list in update item mode
         for (var i = 0; i < obj.fields.length; i++) {
             if (obj.fields[i].depend) {
                 if (!this.props.options.options['options_' + obj.fields[i].field + '_array']
                     && !this.props.options.options['options_' + obj.fields[i].field + '_' + obj.fields[i].option]) {
-                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, placedOrderDetail.data[obj.fields[i].depend]);
+                    this.props.getOptionsByDependId(obj.fields[i].field, obj.fields[i].option, tax.data[obj.fields[i].depend]);
                 }
             }
         }
-        this.setState({ form: this.props.placedOrderDetail.data })
+        this.setState({ form: this.props.tax.data })
     };
 
-    updatePlacedOrderDetailState = () => {
+    updateTaxState = () => {
         const { history, user } = this.props;
         const params = this.props.match.params;
         const { id } = params;
@@ -126,8 +113,8 @@ class PlacedOrderDetail extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.placedOrderDetail.added = false;
-            this.props.newPlacedOrderDetail();
+            this.props.tax.added = false;
+            this.props.newTax();
             this.setState({ isNew: true })
         }
         else {
@@ -136,7 +123,7 @@ class PlacedOrderDetail extends Component {
                     pathname: Constants.PAGE.DENY_PAGE
                 });
             }
-            this.props.getPlacedOrderDetail(id);
+            this.props.getTax(id);
         }
     };
 
@@ -155,11 +142,11 @@ class PlacedOrderDetail extends Component {
 
     canBeSubmitted() {
         if (this.state.isNew) {
-            return this.checkRequiredFields() && !this.props.placedOrderDetail.added &&
-                !_.isEqual(this.props.placedOrderDetail.data, this.state.form)
+            return this.checkRequiredFields() && !this.props.tax.added &&
+                !_.isEqual(this.props.tax.data, this.state.form)
         }
-        return (this.checkRequiredFields() &&
-            !_.isEqual(this.props.placedOrderDetail.data, this.state.form)) || this.state.file != null
+        return this.checkRequiredFields() &&
+            !_.isEqual(this.props.tax.data, this.state.form)
     };
     checkRequiredFields = () => {
         let result = false;
@@ -186,44 +173,9 @@ class PlacedOrderDetail extends Component {
 
         this.setState({ form: _.set({ ...this.state.form }, obj.field, changeCheckBoxValue) });
     };
-    handleUploadChange = (e, field) => {
-        const types = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
-        if (types.every(type => e.target.files[0].type !== type)) {
-            this.props.showMessage({ message: Constants.MODAL.WRONG_FILE_TYPE, variant: Constants.VARIANT.ERROR });
-        }
-        else {
-            this.setState({ file: _.set({ ...this.state.file }, field, e.target.files[0]) })
-        }
-    };
-    fileUpload = (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        return Upload(formData);
-    };
-    uploadImage = async () => {
-        for (var k in this.state.file) {
-            if (typeof this.state.file[k] !== 'function') {
-                await this.fileUpload(this.state.file[k]).then((response) => {
-                    this.setState({ ...this.state.form[k] = response.data }, function () {
-                        delete this.state.file[k];
-                    })
-                })
-            }
-        }
-        this.setState({ file: null })
-    }
-    submit = async () => {
-        const { savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
-        const { form } = this.state;
-        if (this.state.file != null) {
-            await this.uploadImage();
-        }
-        this.state.isNew ? addPlacedOrderDetail(form) : savePlacedOrderDetail(form);
-    }
 
     render() {
-        const { classes, savePlacedOrderDetail, addPlacedOrderDetail } = this.props;
+        const { saveTax, addTax } = this.props;
         const { form } = this.state;
         return (
             <FusePageCarded
@@ -269,11 +221,10 @@ class PlacedOrderDetail extends Component {
                                     className="whitespace-no-wrap"
                                     variant="contained"
                                     disabled={!this.canBeSubmitted()}
-                                    onClick={this.submit}
+                                    onClick={() => { this.state.isNew ? addTax(form) : saveTax(form) }}
                                 >
                                     Save
                                 </Button>
-
                             </FuseAnimate>
                         </div>
                     )
@@ -473,13 +424,13 @@ class PlacedOrderDetail extends Component {
                                                         key={f.field}
                                                         type="number"
                                                         className="mt-8 mb-16"
-                                                        error={f.required ? form[f.field] === 0 : false}
+                                                        error={f.required ? form[f.field] === '' : false}
                                                         required={f.required ? true : false}
                                                         label={f.label}
                                                         autoFocus={f.autoFocus ? f.autoFocus : false}
                                                         id={f.field}
                                                         name={f.field}
-                                                        value={form[f.field] || 0}
+                                                        value={form[f.field] || ''}
                                                         onChange={this.handleChange}
                                                         variant="outlined"
                                                         InputProps={{
@@ -487,44 +438,6 @@ class PlacedOrderDetail extends Component {
                                                         }}
                                                         fullWidth
                                                     />
-                                                )
-                                            }
-                                        case "upload":
-                                            {
-                                                let imagePreview = null;
-                                                if (form[f.field]) {
-                                                    imagePreview = (<img className='w-64 m-4' src={form[f.field]} />);
-                                                }
-                                                return (
-                                                    <div key={f.field}>
-                                                        <TextField
-                                                            id={f.field}
-                                                            name={f.field}
-                                                            value={form[f.field] || ''}
-                                                            required={f.required ? form[f.field] === '' : false}
-                                                            label={f.label}
-                                                            type="text"
-                                                            className={`${classes.textField} mt-8 mb-16`}
-                                                            onChange={this.handleChange}
-                                                            inputProps={{
-                                                                readOnly: this.state.isNew ? false : f.readOnly,
-                                                            }}
-                                                            variant="outlined"
-                                                        />
-                                                        <input accept="image/*" className={classes.input}
-                                                            onChange={event => this.handleUploadChange(event, f.field)} multiple id="icon-button-file" type="file" />
-                                                        <label htmlFor="icon-button-file">
-                                                            <IconButton
-                                                                color="primary"
-                                                                aria-label="Upload picture"
-                                                                className={classes.button}
-                                                                component="span"
-                                                            >
-                                                                <PhotoCamera fontSize="large" />
-                                                            </IconButton>
-                                                        </label>
-                                                        {imagePreview}
-                                                    </div>
                                                 )
                                             }
                                         default:
@@ -565,21 +478,21 @@ class PlacedOrderDetail extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
         showMessage: showMessage,
-        getPlacedOrderDetail: Actions.getPlacedOrderDetail,
-        newPlacedOrderDetail: Actions.newPlacedOrderDetail,
-        addPlacedOrderDetail: Actions.addPlacedOrderDetail,
-        savePlacedOrderDetail: Actions.savePlacedOrderDetail,
+        getTax: Actions.getTax,
+        newTax: Actions.newTax,
+        addTax: Actions.addTax,
+        saveTax: Actions.saveTax,
         getOptionsByKey: SharedActions.getOptionsByKey,
         getOptionsByDependId: SharedActions.getOptionsByDependId
     }, dispatch);
 }
 
-function mapStateToProps({ order, options, auth }) {
+function mapStateToProps({ category, options, auth }) {
     return {
-        placedOrderDetail: order.placedOrderDetail,
+        tax: category.tax,
         options: options,
         user: auth.user
     }
 }
 
-export default withReducer('options', SharedReducer)(withReducer('order', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(PlacedOrderDetail)))));
+export default withReducer('options', SharedReducer)(withReducer('category', reducer)(withStyles(styles, { withTheme: true })(withRouter(connect(mapStateToProps, mapDispatchToProps)(Tax)))));

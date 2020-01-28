@@ -5,7 +5,23 @@ export const GET_PLACED_ORDERS = '[ADMIN] GET PLACED ORDERS';
 export const SET_STATUS = '[ADMIN] SET STATUS';
 
 export function getPlacedOrders(pageIndex, pageSize) {
-    const request = AxiosConfig.get(Constants.API_PLACED_ORDER.order, {
+    const request = AxiosConfig.get(Constants.API_PLACED_ORDER.getAllExceptCanceledOrder, {
+        params: {
+            pageIndex: pageIndex,
+            pageSize: pageSize
+        }
+    });
+
+    return (dispatch) =>
+        request.then((response) =>
+            dispatch({
+                type: GET_PLACED_ORDERS,
+                payload: response.data
+            })
+        );
+}
+export function getCanceledPlacedOrders(pageIndex, pageSize) {
+    const request = AxiosConfig.get(Constants.API_PLACED_ORDER.getCanceledOrder, {
         params: {
             pageIndex: pageIndex,
             pageSize: pageSize

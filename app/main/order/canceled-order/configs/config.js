@@ -50,7 +50,6 @@ obj.fields = [
     { field: "UpdatedStaffId", label: "Updated Staff", view: 'Name', depend: 'RestaurantId', create: false, edit: false, list: false, type: 'select', option: '/option/getaccount', align: 'left', disablePadding: false, sort: true },
     { field: "UpdatedDate", label: "Updated Date", create: false, edit: false, list: false, type: 'datetime', align: 'left', disablePadding: false, sort: true },
     { field: "OrderProcessId", label: "Order Process", view: 'Name', create: false, edit: false, list: true, type: 'select', option: '/option/getorderprocess', align: 'left', disablePadding: false, sort: true, readOnly: true },
-    { field: "IsFinish", label: "Finish", create: false, edit: false, list: true, type: "active", align: 'right', disablePadding: false, sort: true },
     { field: "Status", label: "active", create: false, edit: false, list: true, type: "active", align: 'right', disablePadding: false, sort: true }
 
 ];

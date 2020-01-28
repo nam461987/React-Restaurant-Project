@@ -1,27 +1,12 @@
 import React, { Component } from 'react';
-import {
-    Icon,
-    Table,
-    TableBody,
-    TableCell,
-    TablePagination,
-    TableRow,
-    Checkbox,
-    Button,
-    ListItemIcon,
-    ListItemText,
-    withStyles,
-    Menu,
-    MenuItem,
-    IconButton
-} from '@material-ui/core';
+import { Icon, Table, TableBody, TableCell, TablePagination, TableRow, Checkbox } from '@material-ui/core';
 import { FuseScrollbars } from '@fuse';
 import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import connect from 'react-redux/es/connect/connect';
 import _ from '@lodash';
 import slugify from 'slugify';
-import ComponentTableHead from './TableHead';
+import ComponentTableHead from 'app/main/shared/components/TableHead';
 import * as Actions from '../store/actions';
 import Filter from 'app/main/shared/functions/filters';
 
@@ -31,15 +16,17 @@ class ComponentTable extends Component {
         order: 'asc',
         orderBy: null,
         selected: [],
-        data: this.props.Items
+        data: this.props.Items,
+        page: 0,
+        rowsPerPage: 10
     };
 
     componentDidMount() {
-        this.props.getOrderDetailByOrderId(this.props.match.params);
+        this.props.getTaxes(this.state.page, this.state.rowsPerPage);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (!_.isEqual(this.props.Items, prevProps.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
+        if (!_.isEqual(this.props.Items.Items, prevProps.Items.Items) || !_.isEqual(this.props.searchText, prevProps.searchText)
             || !_.isEqual(this.props.page, prevProps.page)) {
             const data = this.getFilteredArray(this.props.Items, this.props.searchText);
             this.setState({ data })
@@ -52,7 +39,7 @@ class ComponentTable extends Component {
         if (searchText.length === 0) {
             return newData;
         }
-        newData = _.filter(newData, item => {
+        newData.Items = _.filter(newData.Items, item => {
             for (var i = 0; i < listObj.length; i++) {
                 if (item[listObj[i].field] != null &&
                     item[listObj[i].field].toString().toLowerCase().includes(searchText.toString().toLowerCase())) {
@@ -81,11 +68,7 @@ class ComponentTable extends Component {
     }
     handleSelectAllClick = event => {
         if (event.target.checked) {
-            this.setState(state => ({
-                selected: Object.keys(this.state.data).map((n, index) => ({
-                    id: n.Id, status: n.Status, parentId: n.PlacedOrderId
-                }))
-            }));
+            this.setState(state => ({ selected: this.state.data.Items.map(n => ({ id: n.Id, status: n.Status })) }));
             return;
         }
         this.setState({ selected: [] });
@@ -118,10 +101,20 @@ class ComponentTable extends Component {
         this.setState({ selected: newSelected });
     };
 
+    handleChangePage = (event, page) => {
+        this.props.getTaxes(page, this.state.rowsPerPage);
+        this.setState({ page, selected: [] });
+    };
+
+    handleChangeRowsPerPage = event => {
+        this.props.getTaxes(0, event.target.value);
+        this.setState({ rowsPerPage: event.target.value, selected: [] });
+    };
+
     isSelected = obj => this.state.selected.findIndex(x => x.id === obj.id) !== -1;
 
     render() {
-        const { obj, setStatus, user } = this.props;
+        const { obj, setStatus } = this.props;
         const { order, orderBy, selected, rowsPerPage, page, data } = this.state;
         return (
             <div className="w-full flex flex-col">
@@ -145,7 +138,7 @@ class ComponentTable extends Component {
                         />
 
                         <TableBody>
-                            {_.orderBy(data, [
+                            {_.orderBy(data.Items, [
                                 (o) => {
                                     switch (orderBy) {
                                         case 'categories':
@@ -161,7 +154,7 @@ class ComponentTable extends Component {
                             ], [order])
                                 // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map(n => {
-                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status, parentId: n.PlacedOrderId });
+                                    const isSelected = this.isSelected({ id: n.Id, status: n.Status });
 
                                     return (
                                         <TableRow
@@ -172,14 +165,13 @@ class ComponentTable extends Component {
                                             tabIndex={-1}
                                             key={n.Id}
                                             selected={isSelected}
-                                            // onClick={event => this.handleClick(n, obj.baseRoute)}
+                                            onClick={event => this.handleClick(n, obj.baseRoute)}
                                         >
                                             <TableCell className="w-48 pl-4 sm:pl-12" padding="checkbox">
                                                 <Checkbox
                                                     checked={isSelected}
                                                     onClick={event => event.stopPropagation()}
-                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status, parentId: n.PlacedOrderId })}
-                                                    disabled={n.IsFinish ? true : false}
+                                                    onChange={event => this.handleCheck(event, { id: n.Id, status: n.Status })}
                                                 />
                                             </TableCell>
 
@@ -207,17 +199,8 @@ class ComponentTable extends Component {
                                                                 case "select":
                                                                 case "select2":
                                                                     {
-                                                                        if (f.field == 'OrderProcessId') {
-                                                                            return (
-                                                                                <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
-                                                                                    <div className={`inline text-12 p-4 rounded truncate ${n.OrderProcessIdColor}`}>
-                                                                                        {n[c]}
-                                                                                    </div>
-                                                                                </TableCell>
-                                                                            );
-                                                                        }
                                                                         return (
-                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
+                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none" align={f.align}>
                                                                                 {n[c]}
                                                                             </TableCell>
                                                                         )
@@ -233,15 +216,15 @@ class ComponentTable extends Component {
                                                                 case "upload":
                                                                     {
                                                                         return (
-                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
-                                                                                <div dangerouslySetInnerHTML={{ __html: Filter.svcImage(n[c] != null ? n[c] : '') }} />
+                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none" align={f.align}>
+                                                                                {Filter.svcImage(n[c])}
                                                                             </TableCell>
                                                                         )
                                                                     }
                                                                 case "textarea":
                                                                     {
                                                                         return (
-                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none">
+                                                                            <TableCell key={index} className="w-52" component="th" scope="row" padding="none" align={f.align}>
                                                                                 <div>{n[c]}</div>
                                                                             </TableCell>
                                                                         )
@@ -275,7 +258,20 @@ class ComponentTable extends Component {
                     </Table>
                 </FuseScrollbars>
 
-
+                <TablePagination
+                    component="div"
+                    count={data.TotalItems != null ? data.TotalItems : 0}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    backIconButtonProps={{
+                        'aria-label': 'Previous Page'
+                    }}
+                    nextIconButtonProps={{
+                        'aria-label': 'Next Page'
+                    }}
+                    onChangePage={this.handleChangePage}
+                    onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                />
             </div>
         );
     }
@@ -283,16 +279,15 @@ class ComponentTable extends Component {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-        setStatus: Actions.setPlacedOrderDetailstatus,
-        getOrderDetailByOrderId: Actions.getOrderDetailByOrderId
+        getTaxes: Actions.getTaxes,
+        setStatus: Actions.setTaxStatus
     }, dispatch);
 }
 
-function mapStateToProps({ order, SharedReducers, auth }) {
+function mapStateToProps({ category, SharedReducers }) {
     return {
-        Items: order.summary.orderDetails,
-        searchText: SharedReducers.searchText.searchText,
-        user: auth.user
+        Items: category.taxes.data,
+        searchText: SharedReducers.searchText.searchText
     }
 }
 
